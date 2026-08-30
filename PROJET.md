@@ -213,7 +213,24 @@ l'accepte. Deux endroits ne l'acceptent pas — l'écran d'accueil d'un iPhone e
 l'écran de lancement Android — et `tools/icones.html` fabrique les PNG à la
 demande. Tant qu'ils ne sont pas déposés, l'application s'installe quand même.
 
-### 10. Les informations réglementaires sont datées et sourcées
+### 10. Renommer l'application ne doit effacer le dossier de personne
+
+L'application s'est d'abord appelée « Clé de 12 », et ses clés de `localStorage`
+portaient ce nom. Les renommer en `hydropro.*` sans précaution n'aurait rien
+supprimé — le dossier serait resté dans le navigateur, intact — mais **plus
+personne ne serait allé le chercher**, ce qui revient au même pour l'artisan qui
+retrouve une application vide.
+
+`CONFIG.storageAncien` garde donc les anciennes clés, et `charger()` comme
+`lirePrefs()` les relisent une seule fois : la valeur est recopiée sous la
+nouvelle clé, l'ancienne est effacée. Ces quelques lignes pourront disparaître le
+jour où plus personne ne peut avoir ouvert l'ancienne version.
+
+La même prudence vaut pour `VERSION` dans `sw.js` : la changer invalide les
+anciens caches, ce qui est ici **voulu** — sans cela, un téléphone qui avait
+installé l'application aurait continué à servir l'ancienne coquille.
+
+### 11. Les informations réglementaires sont datées et sourcées
 
 `data/tva.json` et `data/checklist.json` portent un champ `verifieLe` et des
 liens vers les textes officiels. Ce sont des **aide-mémoire**, affichés comme

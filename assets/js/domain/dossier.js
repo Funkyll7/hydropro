@@ -299,12 +299,32 @@ export function articleVide(patch = {}) {
  */
 export function charger() {
   try {
-    const brut = localStorage.getItem(CLE);
+    const brut = localStorage.getItem(CLE) || reprendreAncienneCle();
     if (!brut) return dossierVide();
     return normaliser(JSON.parse(brut));
   } catch (e) {
     console.warn("Dossier illisible, repart d'un dossier vierge.", e);
     return dossierVide();
+  }
+}
+
+/**
+ * Recupere le dossier range sous l'ancien nom de l'application.
+ *
+ * Ne s'execute qu'une fois : la valeur est recopiee sous la nouvelle cle et
+ * l'ancienne effacee. Sans cela, un artisan qui avait deja saisi ses clients
+ * aurait retrouve une application vide apres le changement de nom — ses
+ * donnees toujours dans le navigateur, mais plus personne pour les lire.
+ */
+function reprendreAncienneCle() {
+  try {
+    const ancien = localStorage.getItem(CONFIG.storageAncien.dossier);
+    if (!ancien) return null;
+    localStorage.setItem(CLE, ancien);
+    localStorage.removeItem(CONFIG.storageAncien.dossier);
+    return ancien;
+  } catch {
+    return null;
   }
 }
 
@@ -404,14 +424,14 @@ export function exporter(dossier) {
 
 /** Un nom de fichier date, qui se trie tout seul dans un dossier. */
 export function nomExport(dossier) {
-  const nom = (dossier.entreprise.nom || "cle12")
+  const nom = (dossier.entreprise.nom || "hydropro")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 30);
-  return `${nom || "cle12"}-${aujourdhui()}.json`;
+  return `${nom || "hydropro"}-${aujourdhui()}.json`;
 }
 
 /**
@@ -429,7 +449,7 @@ export function importer(texte) {
     throw new Error("Ce fichier n'est pas un fichier de sauvegarde lisible.");
   }
   if (!brut || typeof brut !== "object" || !("clients" in brut || "documents" in brut)) {
-    throw new Error("Ce fichier ne contient pas de dossier Clé de 12.");
+    throw new Error("Ce fichier ne contient pas de dossier Hydropro.");
   }
   return normaliser(brut);
 }

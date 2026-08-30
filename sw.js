@@ -20,7 +20,7 @@
  *    seul bug que cette application ne peut pas se permettre.
  */
 
-const VERSION = "cle12-v1";
+const VERSION = "hydropro-v1";
 const CACHE_COQUE = `${VERSION}-coque`;
 const CACHE_DATA = `${VERSION}-data`;
 
@@ -28,7 +28,7 @@ const CACHE_DATA = `${VERSION}-data`;
  * LA LISTE DOIT ETRE COMPLETE. `addAll` est ATOMIQUE : un seul fichier
  * manquant fait echouer toute l'installation, la premiere inscription est
  * jetee, et le mode hors ligne ne s'installe jamais — sans le moindre message,
- * puisque le site continue de marcher en ligne. `tools/verifier.mjs` compare
+ * puisque le site continue de marcher en ligne. `tools/verification.html` compare
  * cette liste au contenu reel du dossier.
  */
 const COQUE = [

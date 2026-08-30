@@ -20,12 +20,28 @@ const CLE = CONFIG.storage.prefs;
 /** Tous les reglages, ou un objet vide si rien n'est lisible. */
 export function lirePrefs() {
   try {
-    const brut = JSON.parse(localStorage.getItem(CLE) || "{}");
+    const brut = JSON.parse(localStorage.getItem(CLE) || reprendreAncienneCle() || "{}");
     // `typeof null === "object"` : sans ce test, un `null` stocke se propagerait
     // et le premier `prefs.theme` leverait.
     return brut && typeof brut === "object" ? brut : {};
   } catch {
     return {};
+  }
+}
+
+/**
+ * Recupere les reglages ranges sous l'ancien nom de l'application.
+ * Meme logique que pour le dossier — voir CONFIG.storageAncien.
+ */
+function reprendreAncienneCle() {
+  try {
+    const ancien = localStorage.getItem(CONFIG.storageAncien.prefs);
+    if (!ancien) return null;
+    localStorage.setItem(CLE, ancien);
+    localStorage.removeItem(CONFIG.storageAncien.prefs);
+    return ancien;
+  } catch {
+    return null;
   }
 }
 

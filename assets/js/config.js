@@ -4,7 +4,7 @@
 
 export const CONFIG = {
   /** Le nom affiche. A changer aussi dans <title> et dans le manifeste. */
-  nom: "Clé de 12",
+  nom: "Hydropro",
   baseline: "Gestion plombier-chauffagiste",
 
   /**
@@ -16,8 +16,23 @@ export const CONFIG = {
    */
   storage: {
     /** Le dossier complet : entreprise, clients, rendez-vous, documents. */
-    dossier: "cle12.dossier.v1",
+    dossier: "hydropro.dossier.v1",
     /** Theme, taille du texte, onglet ouvert : ce qui decrit l'APPAREIL. */
+    prefs: "hydropro.prefs.v1",
+  },
+
+  /**
+   * Les cles employees quand l'application s'appelait « Clé de 12 ».
+   *
+   * Renommer une cle de localStorage, c'est ABANDONNER ce qu'elle contenait :
+   * le dossier serait toujours la, dans le navigateur, mais plus personne
+   * n'irait le chercher. Au premier lancement apres le changement de nom, le
+   * dossier et les reglages sont donc recopies sous les nouvelles cles, et les
+   * anciennes effacees. Ces deux lignes pourront disparaitre le jour ou plus
+   * personne ne peut avoir ouvert l'ancienne version.
+   */
+  storageAncien: {
+    dossier: "cle12.dossier.v1",
     prefs: "cle12.prefs.v1",
   },
 
