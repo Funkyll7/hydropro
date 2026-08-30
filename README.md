@@ -6,6 +6,13 @@ Agenda, fichier clients, appareils installés, devis, factures, bons
 d'intervention, contrats d'entretien et chiffres — sans compte, sans serveur,
 sans abonnement, et sans réseau une fois la page ouverte.
 
+**→ [funkyll7.github.io/hydropro](https://funkyll7.github.io/hydropro/)**
+
+Ouvrez cette adresse sur votre téléphone, puis « Ajouter à l'écran d'accueil » :
+l'application s'installe et fonctionne ensuite hors ligne. Le site est public,
+**vos données ne le sont pas** — elles restent dans le navigateur de votre
+appareil et ne sont envoyées nulle part.
+
 ---
 
 ## Ce que ça fait
