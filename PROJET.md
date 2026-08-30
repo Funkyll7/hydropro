@@ -251,9 +251,18 @@ on se trompe :
   cache ne servant que de repli. Un taux de TVA périmé servi silencieusement
   produirait une facture fausse.
 
+Deux pièges, tous deux **silencieux** — le site continue de marcher en ligne, et
+rien ne signale que le mode hors ligne ne s'est jamais installé.
+
 `cache.addAll()` est **atomique** : un seul fichier manquant dans la liste
-`COQUE` fait échouer toute l'installation, sans le moindre message, puisque le
-site continue de marcher en ligne. `tools/verification.html` compare cette liste
+`COQUE` fait échouer toute l'installation.
+
+Et l'inscription elle-même doit tester `document.readyState`. `demarrer()` est
+asynchrone : il attend les données de référence. Sur un vrai réseau,
+l'évènement `load` est donc **déjà passé** quand `brancherHorsLigne()` s'exécute,
+et un écouteur posé à ce moment-là ne se déclenche jamais. En local, où les
+fichiers arrivent en une milliseconde, `load` arrivait après et le bug restait
+invisible : il n'est apparu qu'à la première mise en ligne. `tools/verification.html` compare cette liste
 au contenu réel du dossier et aux `modulepreload` de `index.html` — c'est le
 contrôle le plus utile de la page.
 
