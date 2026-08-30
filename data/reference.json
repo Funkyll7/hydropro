@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "note": "Les listes fixes de l'application : types de rendez-vous, états des documents, unités, moyens de paiement, familles d'équipements. Modifier une CLÉ ici oblige à migrer les dossiers existants ; modifier un LIBELLÉ est sans risque.",
+
+  "typesRdv": [
+    { "cle": "depannage", "nom": "Dépannage", "court": "Dép.", "couleur": "alerte", "dureeMin": 90, "aide": "Fuite, panne, plus d'eau chaude. Se place en priorité et déborde souvent." },
+    { "cle": "entretien", "nom": "Entretien", "court": "Entr.", "couleur": "cuivre", "dureeMin": 60, "aide": "Visite annuelle de chaudière, de PAC, de chauffe-eau. Se planifie des mois à l'avance." },
+    { "cle": "installation", "nom": "Installation", "court": "Inst.", "couleur": "accent", "dureeMin": 240, "aide": "Pose, remplacement, chantier. Bloque une demi-journée ou plus." },
+    { "cle": "visite", "nom": "Visite pour devis", "court": "Devis", "couleur": "ok", "dureeMin": 45, "aide": "Métré, relevé, prise de cotes. À transformer en devis dans la foulée." },
+    { "cle": "sav", "nom": "Retour SAV", "court": "SAV", "couleur": "avert", "dureeMin": 60, "aide": "Reprise sur un chantier déjà facturé. À suivre : ce temps-là n'est pas facturé." },
+    { "cle": "perso", "nom": "Personnel", "court": "Perso", "couleur": "neutre", "dureeMin": 60, "aide": "Congé, fournisseur, comptable, formation. Bloque le créneau sans client." }
+  ],
+
+  "statutsRdv": [
+    { "cle": "prevu", "nom": "Prévu", "couleur": "neutre" },
+    { "cle": "confirme", "nom": "Confirmé", "couleur": "info" },
+    { "cle": "fait", "nom": "Fait", "couleur": "ok" },
+    { "cle": "annule", "nom": "Annulé", "couleur": "alerte" }
+  ],
+
+  "statutsDevis": [
+    { "cle": "brouillon", "nom": "Brouillon", "couleur": "neutre", "aide": "Pas encore envoyé. Modifiable librement." },
+    { "cle": "envoye", "nom": "Envoyé", "couleur": "info", "aide": "En attente de la réponse du client. C'est ici qu'on relance." },
+    { "cle": "accepte", "nom": "Accepté", "couleur": "ok", "aide": "Signé. Il ne reste qu'à planifier le chantier et à facturer." },
+    { "cle": "refuse", "nom": "Refusé", "couleur": "alerte", "aide": "Perdu. Notez pourquoi : au bout de dix devis, le motif dit ce qu'il faut changer." },
+    { "cle": "expire", "nom": "Expiré", "couleur": "avert", "aide": "La durée de validité est dépassée. Les prix ne vous engagent plus." }
+  ],
+
+  "statutsFacture": [
+    { "cle": "brouillon", "nom": "Brouillon", "couleur": "neutre" },
+    { "cle": "envoyee", "nom": "Envoyée", "couleur": "info" },
+    { "cle": "partielle", "nom": "Payée en partie", "couleur": "avert" },
+    { "cle": "payee", "nom": "Payée", "couleur": "ok" },
+    { "cle": "retard", "nom": "En retard", "couleur": "alerte" },
+    { "cle": "annulee", "nom": "Annulée", "couleur": "neutre" }
+  ],
+
+  "moyensPaiement": [
+    { "cle": "virement", "nom": "Virement" },
+    { "cle": "cheque", "nom": "Chèque" },
+    { "cle": "cb", "nom": "Carte bancaire" },
+    { "cle": "especes", "nom": "Espèces" },
+    { "cle": "assurance", "nom": "Assurance" },
+    { "cle": "autre", "nom": "Autre" }
+  ],
+
+  "typesClient": [
+    { "cle": "particulier", "nom": "Particulier" },
+    { "cle": "pro", "nom": "Professionnel" },
+    { "cle": "syndic", "nom": "Syndic" },
+    { "cle": "agence", "nom": "Agence, bailleur" },
+    { "cle": "assurance", "nom": "Assurance" }
+  ],
+
+  "categoriesEquipement": [
+    { "cle": "chaudiere", "nom": "Chaudière", "entretienMois": 12, "aide": "Entretien annuel obligatoire pour les appareils de 4 à 400 kW." },
+    { "cle": "pac", "nom": "Pompe à chaleur", "entretienMois": 24, "aide": "Entretien obligatoire tous les 2 ans pour les PAC de 4 à 70 kW." },
+    { "cle": "chauffe-eau", "nom": "Chauffe-eau", "entretienMois": 24, "aide": "Pas d'obligation légale, mais un détartrage tous les 2 ans double la durée de vie." },
+    { "cle": "cet", "nom": "Chauffe-eau thermodynamique", "entretienMois": 24 },
+    { "cle": "adoucisseur", "nom": "Adoucisseur", "entretienMois": 12 },
+    { "cle": "clim", "nom": "Climatisation", "entretienMois": 24 },
+    { "cle": "poele", "nom": "Poêle, insert", "entretienMois": 12, "aide": "Ramonage une à deux fois par an selon le règlement sanitaire départemental." },
+    { "cle": "vmc", "nom": "VMC", "entretienMois": 12 },
+    { "cle": "reseau", "nom": "Réseau, plomberie", "entretienMois": 0 },
+    { "cle": "autre", "nom": "Autre", "entretienMois": 0 }
+  ],
+
+  "energies": [
+    { "cle": "gaz", "nom": "Gaz naturel" },
+    { "cle": "propane", "nom": "Propane, citerne" },
+    { "cle": "fioul", "nom": "Fioul" },
+    { "cle": "elec", "nom": "Électrique" },
+    { "cle": "bois", "nom": "Bois, granulés" },
+    { "cle": "pac", "nom": "Aérothermie, géothermie" },
+    { "cle": "solaire", "nom": "Solaire" }
+  ],
+
+  "unites": ["u", "h", "forfait", "ml", "m²", "jour", "ens.", "kg", "L"],
+
+  "motifsRefus": [
+    "Prix trop élevé",
+    "A choisi un concurrent",
+    "Projet reporté",
+    "Projet abandonné",
+    "Délai trop long",
+    "Sans réponse",
+    "Autre"
+  ],
+
+  "frequencesContrat": [
+    { "mois": 12, "nom": "Annuel" },
+    { "mois": 6, "nom": "Deux fois par an" },
+    { "mois": 24, "nom": "Tous les 2 ans" }
+  ]
+}

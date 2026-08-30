@@ -1,0 +1,7 @@
+# Rien de personnel ne doit partir dans le dépôt : le dossier de l'artisan vit
+# dans le localStorage du navigateur, et ses exports restent sur sa machine.
+sauvegardes/
+*.local.json
+tools/.cache/
+.DS_Store
+Thumbs.db

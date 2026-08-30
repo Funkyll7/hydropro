@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "verifieLe": "2026-08-30",
+  "note": "Deux choses différentes : les OBLIGATIONS, qui pèsent sur l'entreprise et se vérifient une fois par an, et les CHECK-LISTS, qu'on suit appareil en main. Les premières se consultent au bureau, les secondes sur le téléphone en intervention.",
+
+  "obligations": [
+    {
+      "cle": "decennale",
+      "nom": "Assurance décennale",
+      "texte": "Obligatoire avant l'ouverture du chantier pour tous les travaux de plomberie et de chauffage touchant au bâti ou aux équipements indissociables. L'attestation doit figurer sur les devis et les factures.",
+      "periodicite": "Annuelle",
+      "risque": "Amende, et responsabilité personnelle en cas de sinistre non couvert."
+    },
+    {
+      "cle": "rc-pro",
+      "nom": "Responsabilité civile professionnelle",
+      "texte": "Couvre les dommages causés au client pendant l'intervention : dégât des eaux, appareil abîmé, tiers blessé.",
+      "periodicite": "Annuelle"
+    },
+    {
+      "cle": "qualif-gaz",
+      "nom": "Qualification gaz (PG, Professionnel du gaz)",
+      "texte": "Exigée pour intervenir sur les installations de gaz et délivrer les certificats de conformité. À renouveler selon le cycle de l'organisme certificateur.",
+      "periodicite": "Selon organisme"
+    },
+    {
+      "cle": "attestation-capacite",
+      "nom": "Attestation de capacité fluides frigorigènes",
+      "texte": "Obligatoire pour manipuler les fluides des pompes à chaleur et climatisations. L'entreprise doit aussi tenir un registre des fluides et faire contrôler l'étanchéité des installations selon leur charge.",
+      "periodicite": "5 ans"
+    },
+    {
+      "cle": "rge",
+      "nom": "Qualification RGE",
+      "texte": "Nécessaire pour que le client bénéficie des aides publiques (MaPrimeRénov', CEE, TVA à 5,5 % sur certains postes). Audit de chantier périodique.",
+      "periodicite": "Cycle de 4 ans avec audits"
+    },
+    {
+      "cle": "mediateur",
+      "nom": "Adhésion à un médiateur de la consommation",
+      "texte": "Obligatoire dès qu'on travaille pour des particuliers. Les coordonnées doivent figurer sur les devis, les factures et le site internet.",
+      "periodicite": "Annuelle"
+    },
+    {
+      "cle": "dechets",
+      "nom": "Traçabilité des déchets de chantier",
+      "texte": "Le devis doit préciser les modalités d'enlèvement et de traitement des déchets ainsi que l'installation où ils seront déposés. Conserver les bordereaux.",
+      "periodicite": "Par chantier"
+    },
+    {
+      "cle": "vgp",
+      "nom": "Vérification du matériel et de l'outillage",
+      "texte": "Échelles, harnais, appareils de mesure, détecteur de gaz, analyseur de combustion : contrôle et étalonnage périodiques. Un analyseur non étalonné rend l'attestation d'entretien contestable.",
+      "periodicite": "Annuelle"
+    },
+    {
+      "cle": "facturation-electronique",
+      "nom": "Facturation électronique",
+      "texte": "La réforme rend la RÉCEPTION de factures électroniques obligatoire pour toutes les entreprises à partir de septembre 2026 ; l'obligation d'ÉMISSION arrive ensuite, plus tard pour les TPE et PME. Concrètement : il faudra passer par une plateforme agréée. Cette application produit des PDF classiques, elle ne remplace pas une plateforme — prévoyez le sujet avec votre comptable.",
+      "periodicite": "À anticiper",
+      "risque": "Vérifiez le calendrier en vigueur : il a déjà été décalé plusieurs fois."
+    }
+  ],
+
+  "obligationsClient": [
+    {
+      "cle": "entretien-chaudiere",
+      "nom": "Entretien annuel de la chaudière",
+      "texte": "Obligatoire chaque année pour les chaudières de 4 à 400 kW, quel que soit le combustible. C'est l'occupant qui en a la charge, sauf clause contraire du bail. L'attestation d'entretien doit lui être remise dans les 15 jours suivant la visite ; il la conserve 2 ans.",
+      "utile": "C'est la meilleure porte d'entrée en contrat d'entretien : la visite est obligatoire, autant qu'elle soit programmée."
+    },
+    {
+      "cle": "entretien-pac",
+      "nom": "Entretien des pompes à chaleur et climatisations",
+      "texte": "Contrôle périodique obligatoire pour les systèmes de 4 à 70 kW, tous les deux ans. Au-delà, inspection renforcée. Les systèmes chargés en fluide frigorigène relèvent en plus du contrôle d'étanchéité."
+    },
+    {
+      "cle": "ramonage",
+      "nom": "Ramonage des conduits",
+      "texte": "Une à deux fois par an selon le règlement sanitaire départemental et le combustible. Le certificat de ramonage est exigé par les assurances en cas d'incendie."
+    },
+    {
+      "cle": "detartrage",
+      "nom": "Détartrage du chauffe-eau",
+      "texte": "Sans obligation légale, mais recommandé tous les 2 ans en eau dure. Un ballon entartré consomme davantage et sa résistance grille."
+    }
+  ],
+
+  "checklists": [
+    {
+      "cle": "entretien-gaz",
+      "nom": "Entretien chaudière gaz",
+      "duree": "45 à 60 min",
+      "etapes": [
+        "Couper le gaz et l'électricité, vidanger si nécessaire",
+        "Déposer l'habillage, contrôler l'état général et la corrosion",
+        "Nettoyer le corps de chauffe et le brûleur",
+        "Contrôler l'électrode d'allumage et d'ionisation",
+        "Vérifier le vase d'expansion, la pression et la soupape de sécurité",
+        "Contrôler l'étanchéité du circuit gaz au détecteur",
+        "Nettoyer le siphon des condensats et vérifier l'écoulement",
+        "Mesurer la combustion : CO, CO₂, O₂, température des fumées, rendement",
+        "Mesurer le CO ambiant après remise en route",
+        "Contrôler le conduit d'évacuation et la ventilation du local",
+        "Régler la puissance et la courbe de chauffe",
+        "Remettre en service, contrôler la production d'eau chaude",
+        "Renseigner l'attestation d'entretien et la remettre au client sous 15 jours"
+      ]
+    },
+    {
+      "cle": "entretien-pac",
+      "nom": "Entretien pompe à chaleur air/eau",
+      "duree": "60 à 90 min",
+      "etapes": [
+        "Contrôler l'état de l'unité extérieure, dégager les abords",
+        "Nettoyer l'échangeur et la turbine",
+        "Vérifier l'écoulement des condensats et le bac",
+        "Relever les pressions haute et basse, les températures",
+        "Contrôler l'étanchéité du circuit frigorifique",
+        "Vérifier le circulateur, la pression et le vase du circuit d'eau",
+        "Nettoyer le filtre à boues",
+        "Contrôler la loi d'eau, les consignes et le mode de dégivrage",
+        "Vérifier les sécurités et le disjoncteur dédié",
+        "Relever les compteurs et estimer le COP saisonnier",
+        "Renseigner le registre des fluides si intervention sur le circuit"
+      ]
+    },
+    {
+      "cle": "depannage-fuite",
+      "nom": "Dépannage fuite d'eau",
+      "duree": "variable",
+      "etapes": [
+        "Localiser et fermer la vanne d'arrêt générale",
+        "Prendre une photo AVANT toute intervention",
+        "Identifier l'origine : raccord, canalisation, joint, appareil",
+        "Évaluer les dégâts et prévenir le client de ce qui relève de l'assurance",
+        "Réparer ou poser une réparation provisoire",
+        "Remettre en eau progressivement, purger l'air",
+        "Contrôler l'absence de fuite sous pression pendant 10 minutes",
+        "Photo APRÈS, et relevé du compteur",
+        "Faire signer le bon d'intervention",
+        "Établir un devis si une reprise complète est nécessaire"
+      ]
+    },
+    {
+      "cle": "pose-chaudiere",
+      "nom": "Remplacement de chaudière",
+      "duree": "1 journée",
+      "etapes": [
+        "Vérifier la conformité du local, de la ventilation et du conduit",
+        "Couper gaz, eau, électricité ; vidanger l'installation",
+        "Déposer l'ancienne chaudière, prévoir l'évacuation en déchetterie agréée",
+        "Contrôler et adapter les raccordements gaz, eau, condensats",
+        "Poser la chaudière et la ventouse, monter le filtre à boues",
+        "Rincer ou désembouer l'installation avant remise en eau",
+        "Remplir, purger, mettre à la pression de service",
+        "Mise en service : contrôle d'étanchéité gaz, analyse de combustion, réglages",
+        "Paramétrer la régulation et expliquer son fonctionnement au client",
+        "Remettre les notices, la garantie et le certificat de conformité",
+        "Photographier la plaque signalétique et enregistrer l'appareil dans la fiche client"
+      ]
+    },
+    {
+      "cle": "mise-en-service-ecs",
+      "nom": "Pose chauffe-eau",
+      "duree": "2 à 3 h",
+      "etapes": [
+        "Couper l'eau et l'électricité, vidanger l'ancien ballon",
+        "Contrôler la solidité du support et la reprise de charge",
+        "Poser le ballon, groupe de sécurité NEUF obligatoire",
+        "Raccorder l'évacuation du groupe à l'air libre, sans contre-pente",
+        "Poser un réducteur de pression si la pression dépasse 3 bar",
+        "Remplir, purger, contrôler l'absence de fuite",
+        "Raccorder électriquement, vérifier le thermostat, régler à 60 °C minimum",
+        "Expliquer l'entretien : manœuvrer le groupe de sécurité tous les mois"
+      ]
+    }
+  ]
+}

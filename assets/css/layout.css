@@ -1,0 +1,706 @@
+/* =============================================================================
+   layout.css — l'ossature : chargement, barre latérale, page, tiroir, modale.
+   ========================================================================== */
+
+/* ---------------------------- Écran de chargement ------------------------ */
+.boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--bg);
+  text-align: center;
+  z-index: 100;
+}
+
+.boot__logo {
+  width: 60px; height: 60px;
+  animation: respire 1.6s ease-in-out infinite;
+}
+
+@keyframes respire {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(.9); opacity: .65; }
+}
+
+.boot__texte { color: var(--texte-doux); font-size: var(--t-petit); }
+
+.boot__erreur {
+  max-width: 48ch;
+  color: var(--alerte);
+  font-size: var(--t-petit);
+  line-height: 1.5;
+}
+
+/* --------------------------------- App ----------------------------------- */
+.app {
+  display: grid;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ---------------------------- Barre latérale -----------------------------
+   Pas d'ombre : un simple trait vertical sépare mieux deux zones de même
+   niveau qu'une ombre, laquelle suggérerait à tort qu'elle flotte au-dessus. */
+.side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  border-right: var(--trait) solid var(--bord);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.side__contenu {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--sp-5);
+}
+
+/* Chaque bloc est séparé par un trait plutôt que par une marge : sur une barre
+   longue, une simple respiration ne dit plus où finit une section. */
+.side__bloc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border-top: var(--trait) solid var(--bord);
+}
+
+.side__label {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.side__note { font-size: var(--t-note); line-height: 1.5; color: var(--texte-doux); }
+
+/* Un rappel de sauvegarde porte une barre orange à gauche : sur une barre déjà
+   dense, la couleur seule du texte passe inaperçue. */
+.side__note--alerte {
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--avert-doux);
+  border-left: 3px solid var(--avert);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  color: var(--texte);
+  font-weight: 600;
+}
+
+.side__boutons { display: flex; gap: var(--sp-2); }
+.side__boutons > * { flex: 1; }
+
+.side__pied {
+  padding: var(--sp-4);
+  border-top: var(--trait) solid var(--bord);
+  font-size: var(--t-note);
+  color: var(--texte-fantome);
+}
+
+/* --------------------------------- Marque -------------------------------- */
+.marque {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  padding-top: calc(var(--sp-4) + env(safe-area-inset-top));
+}
+
+.marque__logo { width: 34px; height: 34px; flex: none; border-radius: var(--r-md); }
+
+.marque__texte { display: flex; flex-direction: column; min-width: 0; }
+
+.marque__nom {
+  font-size: var(--t-relief);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.15;
+}
+
+.marque__entreprise {
+  font-size: var(--t-note);
+  color: var(--texte-fantome);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Le témoin d'enregistrement. Discret au repos, il s'allume une seconde à
+   chaque écriture : c'est la seule réponse à « est-ce que ça a pris ? » dans
+   une application sans compte ni bouton « Enregistrer ». */
+.temoin {
+  width: 9px; height: 9px;
+  margin-left: auto;
+  flex: none;
+  border-radius: var(--r-pill);
+  background: var(--bord-fort);
+  transition: background-color var(--lent), transform var(--lent), box-shadow var(--lent);
+}
+
+.temoin--actif {
+  background: var(--ok);
+  transform: scale(1.35);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 22%, transparent);
+}
+
+/* --------------------------------- Nav -----------------------------------
+   L'onglet actif porte une barre verticale à gauche, EN PLUS du fond teinté.
+   La couleur seule ne suffit pas : elle disparaît pour un daltonien et se
+   confond avec un simple survol. Une barre se voit dans tous les cas. */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-4);
+  border-top: var(--trait) solid var(--bord);
+}
+
+.nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--cible);
+  padding: 9px 12px;
+  border-radius: var(--r-md);
+  color: var(--texte-doux);
+  font-size: var(--t-corps);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--vite), color var(--vite);
+}
+
+.nav__item:hover { background: var(--surface-2); color: var(--texte); }
+
+.nav__item--actif { background: var(--accent-doux); color: var(--accent); font-weight: 700; }
+
+.nav__item--actif::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+}
+
+.nav__icone { display: grid; place-items: center; width: 20px; flex: none; opacity: .85; }
+.nav__item--actif .nav__icone { opacity: 1; }
+.nav__nom { flex: 1; min-width: 0; }
+
+.nav__badge {
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-micro);
+  font-weight: 600;
+  color: var(--texte-fantome);
+  white-space: nowrap;
+}
+
+.nav__item--actif .nav__badge { color: var(--accent); }
+
+/* Une pastille pleine ne s'emploie QUE pour ce qui coûte de l'argent si on
+   l'oublie : une facture en retard, un devis qui expire. Tout le reste se
+   contente d'un compteur gris. */
+.nav__badge--alerte {
+  display: grid;
+  place-items: center;
+  min-width: 20px; height: 20px;
+  padding: 0 6px;
+  color: #ffffff;
+  background: var(--alerte);
+  border-radius: var(--r-pill);
+  font-weight: 700;
+}
+
+/* -------------------------------- Résumé ---------------------------------
+   Les chiffres qu'on veut voir bouger sans changer de page. Encadré et posé
+   sur un fond creux : c'est le seul bloc de la barre latérale qui affiche un
+   RÉSULTAT, et non un réglage. */
+.resume {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 var(--sp-3) var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--bg-creux);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+}
+
+.resume__ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 3px 0;
+}
+
+.resume__ligne + .resume__ligne--discret {
+  margin-top: 3px;
+  padding-top: 7px;
+  border-top: var(--trait) solid var(--bord);
+}
+
+.resume__ligne--discret + .resume__ligne--discret { margin-top: 0; padding-top: 3px; border-top: 0; }
+
+.resume__label { color: var(--texte-doux); font-size: var(--t-note); }
+.resume__ligne--discret .resume__label { font-size: var(--t-micro); }
+
+.resume__valeur {
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--t-relief);
+  letter-spacing: -.02em;
+}
+
+.resume__ligne--discret .resume__valeur { font-size: var(--t-note); font-weight: 600; }
+.resume__valeur--ok { color: var(--ok); }
+.resume__valeur--alerte { color: var(--alerte); }
+.resume__valeur--avert { color: var(--avert); }
+
+/* ------------------------------- Apparence -------------------------------
+   Des lignes nommées, et non six pastilles muettes qu'il faudrait essayer une
+   par une. Chaque ligne dit ce qu'elle fait, montre sa vraie couleur de fond,
+   et porte une coche quand elle est choisie. */
+.themes { display: flex; flex-direction: column; gap: var(--sp-3); }
+.themes__groupe { display: flex; flex-direction: column; gap: 2px; }
+
+.themes__titre {
+  padding-bottom: 2px;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.theme {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--cible);
+  padding: 7px 10px;
+  border: var(--trait) solid transparent;
+  border-radius: var(--r-md);
+  color: var(--texte-doux);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--vite), border-color var(--vite), color var(--vite);
+}
+
+.theme:hover { background: var(--surface-2); color: var(--texte); }
+.theme--actif { background: var(--accent-doux); border-color: var(--accent); color: var(--accent); }
+
+.theme__pastille {
+  flex: none;
+  width: 22px; height: 22px;
+  border: var(--trait) solid var(--bord-fort);
+  border-radius: var(--r-sm);
+}
+
+/* La pastille du mode automatique est coupée en deux : la moitié claire et la
+   moitié sombre, ce qui est littéralement ce que le réglage fait. */
+.theme__pastille--auto { background: linear-gradient(135deg, #f3f6fa 0 50%, #0e1219 50% 100%); }
+
+.theme__texte { display: flex; flex-direction: column; min-width: 0; }
+.theme__nom { font-size: var(--t-petit); font-weight: 600; }
+.theme__detail { font-size: var(--t-micro); line-height: 1.35; color: var(--texte-fantome); }
+.theme--actif .theme__detail { color: inherit; opacity: .85; }
+.theme__coche { margin-left: auto; font-weight: 700; }
+
+/* ---------------------------- Taille du texte ----------------------------
+   Les boutons MONTRENT le résultat au lieu de le nommer : un « A » plus gros
+   se comprend sans lire. Leurs tailles restent en pixels — sinon ils
+   grossiraient tous ensemble et la comparaison disparaîtrait. */
+.tailles { display: flex; gap: var(--sp-2); align-items: stretch; }
+
+.taille {
+  flex: 1;
+  min-height: var(--cible);
+  padding: 4px;
+  background: var(--surface);
+  border: var(--trait) solid var(--bord-fort);
+  border-radius: var(--r-md);
+  color: var(--texte-doux);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--vite), border-color var(--vite), color var(--vite);
+}
+
+.taille:hover { border-color: var(--texte-fantome); color: var(--texte); }
+.taille--actif { background: var(--accent); border-color: var(--accent); color: var(--accent-encre); }
+
+.side__raccourcis {
+  margin-top: var(--sp-2);
+  font-size: var(--t-micro);
+  line-height: 2;
+  color: var(--texte-fantome);
+}
+
+.side__raccourcis kbd {
+  padding: 2px 6px;
+  background: var(--bg-creux);
+  border: var(--trait) solid var(--bord);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: var(--font-chiffre);
+  font-size: var(--t-micro);
+  color: var(--texte-doux);
+}
+
+/* --------------------------------- Page ----------------------------------- */
+.page { min-width: 0; padding: 0 var(--sp-5) var(--sp-7); }
+
+/* LA BARRE DE TITRE. Elle suit le défilement et doit se lire comme une barre,
+   pas comme un titre qui se trouverait rester en place. Trois choses l'y
+   aident, et il fallait les trois : elle va d'un BORD À L'AUTRE ; son fond est
+   celui d'une SURFACE, distinct de celui de la page ; elle porte un trait en
+   permanence, qui s'affirme une fois détachée. Le contenu, lui, reste aligné
+   sur la colonne de lecture grâce au conteneur intérieur. */
+.page__tete {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 calc(var(--sp-5) * -1);
+  background: var(--surface);
+  border-bottom: var(--trait) solid var(--bord);
+  transition: box-shadow var(--vite), border-color var(--vite);
+}
+
+.page__tete-corps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: nowrap;
+  max-width: calc(var(--page-max) + var(--sp-5) * 2);
+  margin: 0 auto;
+  padding: var(--sp-3) var(--sp-5);
+  padding-top: calc(var(--sp-3) + env(safe-area-inset-top));
+}
+
+.page__tete--detache {
+  border-bottom-color: var(--bord-fort);
+  box-shadow: 0 4px 12px -6px hsl(var(--ombre-teinte) / .45);
+}
+
+/* Caché au-dessus de 900 px : la barre latérale y est déjà visible, et un
+   bouton pour l'ouvrir n'aurait rien à ouvrir. */
+.page__tete-bouton { display: none; }
+
+.page__titre {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-titre);
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page__actions { display: flex; align-items: center; gap: var(--sp-2); flex: none; }
+
+.onglet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-top: var(--sp-4);
+  min-width: 0;
+}
+
+/* `min-width: auto` est la valeur par défaut d'un enfant de flexbox, et elle
+   signifie « ne descends jamais sous la largeur minimale de ton contenu ».
+   Un tableau large — la feuille d'un bon d'intervention — poussait donc toute
+   la colonne au-delà de l'écran, et le téléphone se mettait à défiler
+   horizontalement sur TOUTES les cartes de la page. Un seul élément trop large
+   suffit à casser la page entière : d'où cette règle, posée une fois ici. */
+.onglet > * { min-width: 0; max-width: 100%; }
+
+/* ------------------------- Navigation du bas -----------------------------
+   Sur téléphone uniquement. Le tiroir latéral reste, mais il demande deux
+   gestes — ouvrir, choisir — là où celle-ci n'en demande qu'un, sous le
+   pouce. Cinq entrées au maximum : au-delà, les cibles passent sous 44 px. */
+.basse { display: none; }
+
+/* -------------------------------- Tiroir --------------------------------- */
+.voile { display: none; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+
+  .side {
+    position: fixed;
+    top: 0; left: 0;
+    width: min(320px, 88vw);
+    z-index: 50;
+    transform: translateX(-102%);
+    transition: transform var(--lent) ease;
+    box-shadow: var(--ombre-2);
+  }
+
+  .nav-ouverte .side { transform: none; }
+
+  .voile {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: hsl(var(--ombre-teinte) / .55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--lent);
+  }
+
+  .nav-ouverte .voile { opacity: 1; pointer-events: auto; }
+
+  .page { padding: 0 var(--sp-3) calc(var(--sp-7) + 62px); }
+  .page__tete { margin: 0 calc(var(--sp-3) * -1); }
+
+  .page__tete-corps {
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    padding-top: calc(var(--sp-2) + env(safe-area-inset-top));
+  }
+
+  .page__tete-bouton {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px; height: 40px;
+    background: var(--surface-2);
+    border: var(--trait) solid var(--bord);
+    border-radius: var(--r-md);
+    color: var(--texte-doux);
+    cursor: pointer;
+    transition: background-color var(--vite), color var(--vite), border-color var(--vite);
+  }
+
+  .page__tete-bouton:hover,
+  .nav-ouverte .page__tete-bouton {
+    background: var(--accent-doux);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .page__titre { font-size: var(--t-relief); }
+
+  .basse {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 40;
+    background: var(--surface);
+    border-top: var(--trait) solid var(--bord);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -2px 10px -6px hsl(var(--ombre-teinte) / .5);
+  }
+
+  .basse__item {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 58px;
+    padding: 6px 2px;
+    color: var(--texte-fantome);
+    font-size: var(--t-micro);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .basse__item--actif { color: var(--accent); }
+
+  .basse__item--actif::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 22%; right: 22%;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 0 0 var(--r-pill) var(--r-pill);
+  }
+
+  .basse__pastille {
+    position: absolute;
+    top: 5px;
+    left: calc(50% + 6px);
+    min-width: 16px; height: 16px;
+    padding: 0 4px;
+    display: grid;
+    place-items: center;
+    background: var(--alerte);
+    color: #ffffff;
+    border-radius: var(--r-pill);
+    font-size: 10px;
+    font-weight: 700;
+  }
+}
+
+/* ------------------------- L'en-tête sur téléphone -----------------------
+   À 375 px, un titre plus trois boutons libellés ne tiennent pas : les boutons
+   ne se compriment pas, et c'est le TITRE qui disparaissait — on ne savait plus
+   sur quel document on était.
+
+   Les boutons qui portent un pictogramme perdent donc leur libellé et
+   deviennent des carrés de 44 px. Ils gardent leur `aria-label` et leur
+   infobulle (posés par `bouton()` dans champs.js), donc rien n'est perdu pour
+   un lecteur d'écran. Ceux qui n'ont PAS de pictogramme — « Refusé »,
+   « Aujourd'hui » — gardent leur texte : les vider les rendrait muets. */
+@media (max-width: 560px) {
+  .page__actions .btn:has(svg) .btn__texte { display: none; }
+
+  .page__actions .btn:has(svg) {
+    width: var(--cible);
+    padding: 0;
+    flex: none;
+    gap: 0;
+  }
+
+  .page__actions .btn:not(:has(svg)) {
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .page__titre { font-size: var(--t-corps); }
+  .page__actions { gap: 6px; }
+
+  /* Les actions marquées « optionnelles » quittent l'en-tête sur téléphone.
+     Ce ne sont PAS des actions perdues : chacune a un autre chemin dans la
+     page — « Refusé » par l'état dans le suivi, « Imprimer » par le grand
+     bouton de l'onglet Aperçu. Cinq boutons dans une barre de 375 px, c'est
+     le titre du document qui disparaît, et c'est lui qu'on cherche. */
+  .page__actions .btn--optionnel { display: none; }
+}
+
+/* Un navigateur sans `:has()` garde les libellés : la barre déborde un peu,
+   mais rien ne disparaît. C'est la bonne dégradation. */
+
+/* Un titre collant ne doit pas manger la moitié d'un écran en paysage. */
+@media (max-height: 520px) { .page__tete { position: static; } }
+
+/* -------------------------------- Bandeau -------------------------------- */
+.bandeau {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: min(560px, 92vw);
+  animation: monte var(--lent) ease;
+}
+
+@media (max-width: 900px) { .bandeau { bottom: calc(74px + env(safe-area-inset-bottom)); } }
+
+@keyframes monte {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.bandeau__contenu {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 12px 18px;
+  background: var(--texte);
+  color: var(--bg);
+  border-radius: var(--r-pill);
+  box-shadow: var(--ombre-2);
+  font-size: var(--t-petit);
+  font-weight: 600;
+  text-align: center;
+}
+
+.bandeau__action {
+  color: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.bandeau__contenu--erreur {
+  background: var(--alerte);
+  color: #ffffff;
+  border-radius: var(--r-lg);
+  text-align: left;
+  line-height: 1.5;
+}
+
+/* -------------------------------- Modale ---------------------------------
+   Un <dialog> natif : le navigateur gère le piège au clavier, la touche Échap
+   et l'inertie du fond. Trois problèmes réglés sans une ligne de JavaScript,
+   et mieux réglés que ce qu'on aurait écrit. */
+.modale {
+  width: min(680px, 94vw);
+  max-height: min(88dvh, 900px);
+  padding: 0;
+  background: var(--surface);
+  color: var(--texte);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-xl);
+  box-shadow: var(--ombre-2);
+  overflow: hidden;
+}
+
+.modale::backdrop { background: hsl(var(--ombre-teinte) / .6); }
+.modale[open] { display: flex; flex-direction: column; }
+
+.modale__tete {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: var(--trait) solid var(--bord);
+}
+
+.modale__titre { flex: 1; font-size: var(--t-relief); font-weight: 700; }
+
+.modale__corps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modale__pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-5);
+  padding-bottom: calc(var(--sp-3) + env(safe-area-inset-bottom));
+  background: var(--surface-2);
+  border-top: var(--trait) solid var(--bord);
+}
+
+@media (max-width: 560px) {
+  .modale {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    border: 0;
+  }
+  .modale__pied > .btn { flex: 1; }
+}

@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cle12",
+      "runtimeExecutable": "C:/Program Files (x86)/LibreOffice/program/python.exe",
+      "runtimeArgs": ["-m", "http.server", "4175"],
+      "port": 4175
+    },
+    {
+      "name": "cle12-python",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "4175"],
+      "port": 4175
+    },
+    {
+      "name": "cle12-python3",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4175"],
+      "port": 4175
+    }
+  ]
+}

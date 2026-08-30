@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Clé de 12 — fabrique d'icônes</title>
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.4rem; }
+  code { background: #eee; padding: 1px 5px; border-radius: 4px; }
+  .rangee { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-end; margin: 1.5rem 0; }
+  figure { margin: 0; text-align: center; }
+  canvas { border: 1px solid #ccc; border-radius: 8px; image-rendering: pixelated; }
+  figcaption { font-size: .8rem; color: #555; margin-top: .3rem; }
+  a.btn { display: inline-block; margin-top: .4rem; font-size: .8rem; }
+</style>
+</head>
+<body>
+<h1>Fabrique d'icônes</h1>
+
+<p>Le dépôt ne contient <strong>aucune image binaire</strong> : la marque est un fichier SVG,
+<code>assets/img/favicon.svg</code>, qui sert d'icône partout où le navigateur l'accepte —
+onglet, manifeste, écran d'installation sous Android.</p>
+
+<p>Deux endroits ne l'acceptent pas : l'<strong>écran d'accueil d'un iPhone</strong>, qui
+réclame un PNG, et les <strong>écrans de lancement Android</strong>, plus nets avec un PNG de
+512 px. Cette page les fabrique : elle redessine le logo dans un canvas et propose chaque
+taille au téléchargement.</p>
+
+<p>Le fichier <code>assets/img/favicon.svg</code> reste la source de vérité. Si vous le
+modifiez, reportez la modification dans <code>dessiner()</code> ci-dessous — le dessin est
+refait en code plutôt que chargé depuis le SVG, parce qu'un canvas alimenté par une image
+SVG externe est marqué « pollué » par certains navigateurs et refuse alors
+<code>toDataURL()</code>.</p>
+
+<p>Enregistrez les fichiers téléchargés dans <code>assets/img/</code> sous les noms indiqués,
+puis, pour qu'ils servent réellement :</p>
+<ol>
+  <li>décommentez la ligne <code>apple-touch-icon</code> de <code>index.html</code> ;</li>
+  <li>ajoutez-les au tableau <code>icons</code> de <code>manifest.webmanifest</code> ;</li>
+  <li>ajoutez-les à la liste <code>COQUE</code> de <code>sw.js</code>, faute de quoi ils
+      manqueront hors ligne — et un fichier absent de cette liste fait échouer
+      <em>toute</em> l'installation du cache.</li>
+</ol>
+
+<div class="rangee" id="sortie"></div>
+
+<script>
+/**
+ * Dessine la marque : un carré arrondi bleu, une goutte blanche, une flamme cuivre.
+ * `echelle` = 1 pour une icône pleine page, 0.78 pour une icône « maskable »,
+ * dont les bords peuvent être rognés par le système en cercle ou en losange.
+ */
+function dessiner(ctx, taille, echelle = 1) {
+  const u = taille / 64;
+  const marge = (taille * (1 - echelle)) / 2;
+  const cote = taille * echelle;
+
+  ctx.fillStyle = "#0b57a4";
+  if (echelle === 1) {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, taille, taille, 14 * u);
+    ctx.fill();
+  } else {
+    // Maskable : le fond couvre TOUTE la surface, sans coins arrondis. Le
+    // système découpe lui-même la forme ; un coin arrondi dessiné ici
+    // apparaîtrait comme un liseré blanc sur les téléphones qui rognent en rond.
+    ctx.fillRect(0, 0, taille, taille);
+  }
+
+  ctx.save();
+  ctx.translate(marge, marge);
+  const v = cote / 64;
+
+  ctx.fillStyle = "#ffffff";
+  const goutte = new Path2D("M32 11c0 0-13 15-13 25a13 13 0 0 0 26 0c0-10-13-25-13-25z");
+  ctx.save(); ctx.scale(v, v); ctx.fill(goutte); ctx.restore();
+
+  ctx.fillStyle = "#c9691f";
+  const flamme = new Path2D("M32 25c0 5-5 6-5 11a5 5 0 0 0 10 0c0-4-3-5-5-11z");
+  ctx.save(); ctx.scale(v, v); ctx.fill(flamme); ctx.restore();
+
+  ctx.restore();
+}
+
+const CIBLES = [
+  { nom: "icon-180.png", taille: 180, echelle: 1, note: "iPhone, écran d'accueil" },
+  { nom: "icon-192.png", taille: 192, echelle: 1, note: "Android, manifeste" },
+  { nom: "icon-512.png", taille: 512, echelle: 1, note: "Android, écran de lancement" },
+  { nom: "icon-maskable-512.png", taille: 512, echelle: 0.78, note: "Android, forme adaptative" },
+];
+
+const sortie = document.getElementById("sortie");
+
+for (const c of CIBLES) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = c.taille;
+  canvas.style.width = Math.min(c.taille, 128) + "px";
+  canvas.style.height = Math.min(c.taille, 128) + "px";
+  dessiner(canvas.getContext("2d"), c.taille, c.echelle);
+
+  const lien = document.createElement("a");
+  lien.className = "btn";
+  lien.href = canvas.toDataURL("image/png");
+  lien.download = c.nom;
+  lien.textContent = "Télécharger";
+
+  const fig = document.createElement("figure");
+  const cap = document.createElement("figcaption");
+  cap.innerHTML = `<code>${c.nom}</code><br>${c.taille} px — ${c.note}`;
+  fig.append(canvas, cap, lien);
+  sortie.append(fig);
+}
+</script>
+</body>
+</html>

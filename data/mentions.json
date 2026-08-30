@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "verifieLe": "2026-08-30",
+  "note": "Les mentions imprimées en bas des devis et des factures. Les {{jetons}} sont remplacés par domain/mentions.js à partir de la fiche entreprise ; un jeton dont la valeur manque fait DISPARAÎTRE le paragraphe entier plutôt que d'imprimer un trou — une facture avec « SIRET : {{siret}} » est pire qu'une facture sans la ligne.",
+
+  "obligatoiresDevis": [
+    "La mention « devis » et sa date d'établissement",
+    "Le nom, la forme juridique, l'adresse et le numéro SIRET de l'entreprise",
+    "Le numéro de TVA intracommunautaire, ou la mention de franchise en base",
+    "Le nom et l'adresse du client, et l'adresse du chantier si elle diffère",
+    "Le décompte détaillé de chaque prestation et produit : quantité, unité, prix unitaire",
+    "Les frais de déplacement, s'il y en a",
+    "La somme globale à payer hors taxes et toutes taxes comprises, taux de TVA par ligne",
+    "La durée de validité de l'offre",
+    "Le caractère gratuit ou payant du devis",
+    "L'assurance de responsabilité civile professionnelle et la garantie décennale : nom de l'assureur, numéro de contrat, couverture géographique",
+    "Les modalités de paiement, de règlement et l'échéancier",
+    "Le délai de démarrage et la durée prévisionnelle des travaux",
+    "Pour un particulier démarché à domicile : le droit de rétractation de 14 jours et le formulaire détachable"
+  ],
+
+  "obligatoiresFacture": [
+    "La date d'émission et un numéro unique, chronologique et sans trou",
+    "L'identité complète de l'entreprise et du client",
+    "La date de la vente ou de la fin des travaux",
+    "La désignation détaillée, la quantité et le prix unitaire de chaque ligne",
+    "Le total hors taxes, la TVA par taux, et le total toutes taxes comprises",
+    "La date d'échéance du règlement et les conditions d'escompte",
+    "Le taux des pénalités de retard",
+    "L'indemnité forfaitaire de 40 € pour frais de recouvrement, si le client est un professionnel",
+    "Pour les travaux du bâtiment : l'assurance décennale et sa couverture"
+  ],
+
+  "blocs": {
+    "assurance": {
+      "titre": "Assurances",
+      "texte": "Assurance de responsabilité civile professionnelle et garantie décennale souscrites auprès de {{assureur}}, contrat n° {{contratAssurance}}. Couverture : {{couvertureAssurance}}.",
+      "requis": ["assureur", "contratAssurance"],
+      "aide": "Obligatoire sur tout devis et toute facture de travaux de bâtiment. Son absence est passible d'une amende, et elle est la première chose que regarde un client averti."
+    },
+    "tvaFranchise": {
+      "titre": "TVA",
+      "texte": "TVA non applicable, article 293 B du CGI.",
+      "requis": [],
+      "aide": "À faire figurer quand l'entreprise est en franchise en base. Aucune TVA ne doit alors apparaître ailleurs sur le document."
+    },
+    "tvaReduite": {
+      "titre": "Attestation de TVA à taux réduit",
+      "texte": "Le client atteste que les travaux portent sur un local à usage d'habitation achevé depuis plus de deux ans, et qu'ils n'entrent pas dans le champ des travaux exclus du taux réduit. Une copie signée du présent document vaut attestation et sera conservée par l'entreprise.",
+      "requis": [],
+      "aide": "S'imprime automatiquement dès qu'une ligne du document porte un taux de 10 % ou de 5,5 %."
+    },
+    "penalites": {
+      "titre": "Retard de paiement",
+      "texte": "En cas de retard de paiement, des pénalités au taux de {{penalites}} % par an seront appliquées dès le lendemain de la date d'échéance, sans qu'un rappel soit nécessaire. Pour les clients professionnels s'ajoute une indemnité forfaitaire de 40 € pour frais de recouvrement.",
+      "requis": ["penalites"]
+    },
+    "escompte": {
+      "titre": "Escompte",
+      "texte": "Aucun escompte n'est accordé pour paiement anticipé.",
+      "requis": []
+    },
+    "retractation": {
+      "titre": "Droit de rétractation",
+      "texte": "Contrat conclu hors établissement : le client dispose d'un délai de quatorze jours à compter de la signature pour se rétracter, sans motif ni pénalité. Les travaux ne peuvent commencer avant l'expiration de ce délai, sauf demande expresse et écrite du client. Le formulaire de rétractation est joint.",
+      "requis": [],
+      "aide": "S'applique dès qu'un devis est signé au domicile du client, ce qui est le cas le plus fréquent. L'omission est lourdement sanctionnée ; en cas d'urgence réelle, faites écrire et signer la demande expresse de démarrage immédiat."
+    },
+    "mediateur": {
+      "titre": "Médiation de la consommation",
+      "texte": "En cas de litige non résolu, le client particulier peut saisir gratuitement le médiateur de la consommation : {{mediateur}} — {{mediateurUrl}}.",
+      "requis": ["mediateur"],
+      "aide": "Toute entreprise qui travaille pour des particuliers doit adhérer à un dispositif de médiation et en indiquer les coordonnées."
+    },
+    "paiement": {
+      "titre": "Règlement",
+      "texte": "Règlement par virement sur le compte {{iban}} ({{bic}}), par chèque à l'ordre de {{nomEntreprise}}, ou en espèces dans la limite légale.",
+      "requis": ["iban"]
+    },
+    "acompte": {
+      "titre": "Acompte",
+      "texte": "Un acompte de {{acompte}} est demandé à la signature. Le solde est exigible à la fin des travaux.",
+      "requis": ["acompte"]
+    },
+    "propriete": {
+      "titre": "Réserve de propriété",
+      "texte": "Les matériels fournis restent la propriété de l'entreprise jusqu'au paiement intégral de leur prix.",
+      "requis": []
+    },
+    "dechets": {
+      "titre": "Déchets de chantier",
+      "texte": "Les déchets issus du chantier sont évacués et déposés en centre agréé par l'entreprise, sauf indication contraire portée au devis.",
+      "requis": [],
+      "aide": "Le devis doit préciser les modalités d'enlèvement et de traitement des déchets ainsi que le point de collecte prévu."
+    },
+    "signature": {
+      "titre": "Bon pour accord",
+      "texte": "Devis reçu avant l'exécution des travaux. Date et signature du client, précédées de la mention manuscrite « Bon pour accord ».",
+      "requis": []
+    }
+  },
+
+  "relances": {
+    "devis": [
+      {
+        "cle": "devis-j7",
+        "nom": "Relance de devis, 7 jours",
+        "objet": "Votre devis n° {{numero}} — {{objet}}",
+        "corps": "Bonjour {{client}},\n\nJe reviens vers vous au sujet du devis n° {{numero}} du {{date}}, d'un montant de {{ttc}} TTC.\n\nAvez-vous pu en prendre connaissance ? Je reste disponible pour en discuter, ajuster le contenu ou répondre à vos questions.\n\nPour information, ce devis est valable jusqu'au {{validite}}.\n\nBien cordialement,\n{{signature}}"
+      },
+      {
+        "cle": "devis-expire",
+        "nom": "Devis proche de l'expiration",
+        "objet": "Votre devis n° {{numero}} expire le {{validite}}",
+        "corps": "Bonjour {{client}},\n\nLe devis n° {{numero}} arrive au terme de sa validité le {{validite}}. Au-delà de cette date, les prix indiqués ne m'engagent plus, notamment sur les fournitures.\n\nSi le projet vous intéresse toujours, faites-le moi savoir : je peux le prolonger en l'état ou le remettre à jour.\n\nBien cordialement,\n{{signature}}"
+      }
+    ],
+    "facture": [
+      {
+        "cle": "facture-rappel",
+        "nom": "Rappel courtois",
+        "objet": "Facture n° {{numero}} — rappel",
+        "corps": "Bonjour {{client}},\n\nSauf erreur de ma part, la facture n° {{numero}} du {{date}}, d'un montant de {{reste}}, échue le {{echeance}}, reste à ce jour impayée.\n\nIl s'agit peut-être d'un simple oubli. Si le règlement a été effectué entre-temps, merci de ne pas tenir compte de ce message.\n\nBien cordialement,\n{{signature}}"
+      },
+      {
+        "cle": "facture-relance2",
+        "nom": "Deuxième relance",
+        "objet": "Facture n° {{numero}} — deuxième relance",
+        "corps": "Bonjour {{client}},\n\nMalgré mon précédent message, la facture n° {{numero}} du {{date}}, d'un montant de {{reste}}, demeure impayée depuis le {{echeance}}.\n\nJe vous remercie de bien vouloir procéder au règlement sous huitaine. Passé ce délai, des pénalités de retard au taux de {{penalites}} % par an seront décomptées, conformément aux conditions figurant sur la facture.\n\nJe reste à votre disposition si une difficulté particulière explique ce retard.\n\nBien cordialement,\n{{signature}}"
+      },
+      {
+        "cle": "facture-mise-en-demeure",
+        "nom": "Mise en demeure",
+        "objet": "Mise en demeure de payer — facture n° {{numero}}",
+        "corps": "Madame, Monsieur,\n\nPar la présente, je vous mets en demeure de me régler la somme de {{reste}} correspondant à la facture n° {{numero}} du {{date}}, échue depuis le {{echeance}} et restée impayée malgré mes relances des dernières semaines.\n\nÀ défaut de règlement sous quinze jours à compter de la réception de ce courrier, je me verrai contraint d'engager une procédure de recouvrement, les pénalités de retard et l'indemnité forfaitaire de 40 € restant dues.\n\nCette lettre vous est adressée par courrier recommandé avec accusé de réception.\n\n{{signature}}"
+      }
+    ],
+    "rdv": [
+      {
+        "cle": "rdv-confirmation",
+        "nom": "Confirmation de rendez-vous",
+        "objet": "Confirmation de notre rendez-vous du {{date}}",
+        "corps": "Bonjour {{client}},\n\nJe vous confirme notre rendez-vous le {{date}} à {{heure}}, au {{adresse}}, pour : {{objet}}.\n\nMerci de prévoir un accès dégagé à l'appareil et de couper l'eau ou le gaz si je vous l'ai demandé.\n\nEn cas d'imprévu, prévenez-moi au plus tôt.\n\nBien cordialement,\n{{signature}}"
+      },
+      {
+        "cle": "entretien-echeance",
+        "nom": "Entretien annuel à programmer",
+        "objet": "Entretien annuel de votre {{equipement}}",
+        "corps": "Bonjour {{client}},\n\nL'entretien de votre {{equipement}} arrive à échéance : la dernière visite date du {{dernier}}.\n\nCet entretien est obligatoire chaque année et conditionne la garantie de l'appareil ainsi que la prise en charge par votre assurance en cas de sinistre.\n\nJe vous propose de passer dans les prochaines semaines. Quels jours vous conviendraient ?\n\nBien cordialement,\n{{signature}}"
+      }
+    ]
+  }
+}

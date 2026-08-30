@@ -1,0 +1,88 @@
+/* =============================================================================
+   print.css — ce qui sort de l'imprimante.
+
+   Il n'y a PAS de générateur de PDF dans cette application, et c'est un choix.
+   Une bibliothèque de PDF pèse plusieurs centaines de kilo-octets, rend mal
+   les accents, et il faudrait la maintenir. Le navigateur, lui, sait déjà
+   imprimer et sait déjà « Enregistrer au format PDF » — sur Windows, sur
+   Android, sur iPhone. On lui donne donc une feuille propre et on le laisse
+   faire : le PDF obtenu est un vrai PDF, avec du texte sélectionnable, et il
+   s'envoie par mail comme n'importe quel autre.
+
+   Régler une fois pour toutes dans la boîte d'impression du navigateur :
+   marges « aucune » (elles sont dans la feuille) et « graphiques d'arrière-plan »
+   activés, sans quoi les en-têtes de tableau sortent en blanc sur blanc.
+   ========================================================================== */
+
+@page {
+  size: A4 portrait;
+  /* Zéro : les marges sont portées par `.doc`, en millimètres, ce qui les rend
+     identiques à l'écran et sur le papier. Deux jeux de marges superposés
+     donnaient un document décalé vers le bas de page en page. */
+  margin: 0;
+}
+
+@media print {
+  /* Le fond de l'application ne s'imprime pas : une page A4 grise consomme une
+     cartouche entière pour rien. */
+  html, body {
+    background: #ffffff !important;
+    color: #111318 !important;
+  }
+
+  /* Tout ce qui pilote l'application disparaît. Il ne reste que le document. */
+  .side,
+  .voile,
+  .page__tete,
+  .basse,
+  .bandeau,
+  .evitement,
+  .boot,
+  .no-print { display: none !important; }
+
+  .app { display: block !important; }
+  .page { padding: 0 !important; }
+  .onglet { max-width: none !important; padding: 0 !important; gap: 0 !important; }
+
+  /* La feuille elle-même : plus d'ombre, plus de coins arrondis, plus de
+     largeur maximale — elle EST la page. */
+  .doc {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 14mm 15mm 12mm !important;
+    font-size: 10.5pt;
+  }
+
+  /* Les couleurs de fond des en-têtes de tableau et des bandes de section.
+     Sans cette propriété, Chrome et Safari les suppriment silencieusement et
+     le tableau perd sa structure. */
+  .doc, .doc * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Une ligne de prestation ne doit jamais être coupée en deux par un saut de
+     page : la désignation d'un côté, le prix de l'autre, et le devis devient
+     incompréhensible. */
+  .doc__table tr,
+  .doc__signature,
+  .doc__totaux,
+  .doc__bloc { break-inside: avoid; page-break-inside: avoid; }
+
+  /* Sur un devis de trois pages, l'en-tête du tableau se répète en haut de
+     chaque page — c'est le comportement natif de <thead>, à condition de ne
+     pas le casser. */
+  .doc__table thead { display: table-header-group; }
+  .doc__table tfoot { display: table-footer-group; }
+
+  /* Les mentions légales restent avec ce qui les précède si la place le
+     permet, mais ne doivent pas partir seules sur une page vide. */
+  .doc__mentions { break-before: auto; orphans: 3; widows: 3; }
+
+  /* Les liens gardent leur couleur mais perdent le soulignement : sur papier,
+     un soulignement bleu ne mène nulle part. */
+  a { color: inherit !important; text-decoration: none !important; }
+}

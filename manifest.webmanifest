@@ -1,0 +1,51 @@
+{
+  "name": "Clé de 12 — gestion plombier-chauffagiste",
+  "short_name": "Clé de 12",
+  "description": "Agenda, clients, devis, factures, contrats d'entretien et chiffres pour un artisan plombier-chauffagiste. Tout reste dans le navigateur.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "background_color": "#f3f6fa",
+  "theme_color": "#0b57a4",
+  "categories": ["business", "productivity", "utilities"],
+
+  "icons": [
+    {
+      "src": "assets/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Aujourd'hui",
+      "short_name": "Auj.",
+      "description": "Les rendez-vous du jour et ce qui traîne",
+      "url": "./#accueil"
+    },
+    {
+      "name": "Nouveau devis",
+      "short_name": "Devis",
+      "description": "Chiffrer sur place, pendant la visite",
+      "url": "./#devis"
+    },
+    {
+      "name": "Factures impayées",
+      "short_name": "Impayés",
+      "description": "Ce qu'on vous doit, et depuis quand",
+      "url": "./#factures"
+    }
+  ]
+}

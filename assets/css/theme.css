@@ -1,0 +1,342 @@
+/* =============================================================================
+   theme.css — les jetons de design.
+
+   Toutes les couleurs, tous les rayons, tous les espacements passent par ces
+   variables. Aucune valeur de couleur n'est écrite dans les autres feuilles :
+   pour retoucher l'apparence, c'est ici, et nulle part ailleurs.
+
+   La palette est pilotée par l'attribut `data-theme` sur <html>, posé par
+   ui/theme.js. En mode « auto », l'attribut vaut `clair` ou `sombre` selon le
+   réglage du système.
+
+   TROIS COULEURS DE SENS, et leur signification ne change JAMAIS d'une palette
+   à l'autre : --ok (payé, accepté, fait), --avert (en attente, à relancer),
+   --alerte (en retard, refusé, urgent). Une couleur dont le sens dépend du
+   thème oblige à relire l'étiquette, et n'aura donc servi à rien. Seule leur
+   clarté s'adapte pour rester lisible sur chaque fond.
+   ========================================================================== */
+
+:root {
+  /* --- Rayons -------------------------------------------------------------
+     Une échelle courte. Des rayons trop généreux donnent un air de jouet ; un
+     outil qui édite des devis a intérêt à paraître carré. */
+  --r-sm: 5px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+  --r-pill: 999px;
+
+  /* --- Rythme vertical ----------------------------------------------------
+     Une échelle de 4 px, sans valeur intermédiaire. Toute marge du site est
+     l'un de ces sept crans : c'est ce qui fait qu'une page dense reste
+     ordonnée, là où des valeurs choisies au cas par cas donnent un alignement
+     approximatif que l'œil remarque sans savoir pourquoi. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  --side-w: 284px;
+  --page-max: 1080px;
+
+  /* --- Typographie --------------------------------------------------------
+     Aucune police à télécharger : les piles système sont déjà installées,
+     s'affichent au premier rendu, et fonctionnent hors ligne — ce qui compte
+     pour une application qu'on ouvre dans une chaufferie sans réseau. */
+  --font-body: system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Les montants se lisent en colonne : sans chasse fixe, « 1 234 » et
+     « 8 888 » n'ont pas la même largeur et les totaux cessent de s'aligner. */
+  --font-chiffre: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", Consolas, monospace;
+
+  /* --- Cibles tactiles ----------------------------------------------------
+     44 px, la taille d'un doigt. En dessous, on rate le bouton une fois sur
+     trois — et cette application se pilote surtout d'une main, sur un
+     téléphone, debout dans une cave. */
+  --cible: 44px;
+
+  --trait: 1px;
+  --trait-fort: 2px;
+
+  /* --- Élévation ----------------------------------------------------------
+     Deux niveaux, délibérément. Trois ombres sur une même page ne se lisent
+     plus comme une hiérarchie mais comme une inconsistance. Le niveau 1 pose
+     une carte sur le fond ; le niveau 2 détache ce qui flotte au-dessus de
+     tout — tiroir de navigation, fenêtre modale, bandeau. */
+  --ombre-teinte: 212 45% 14%;
+  --ombre-1: 0 1px 2px hsl(var(--ombre-teinte) / .06),
+             0 2px 6px hsl(var(--ombre-teinte) / .05);
+  --ombre-2: 0 2px 8px hsl(var(--ombre-teinte) / .10),
+             0 12px 28px hsl(var(--ombre-teinte) / .10);
+  --ombre: var(--ombre-1);
+
+  --vite: 110ms;
+  --lent: 200ms;
+}
+
+/* =============================================================================
+   CLAIR — la palette par défaut. Un bleu de plan, un cuivre de raccord.
+   ========================================================================== */
+:root,
+:root[data-theme="clair"] {
+  --bg: #f3f6fa;
+  --bg-creux: #e7ecf3;
+  --surface: #ffffff;
+  --surface-2: #f3f6fa;
+  --bord: #ccd4de;
+  --bord-fort: #8b95a3;
+
+  --texte: #0e131a;
+  --texte-doux: #3c4653;
+  --texte-fantome: #5b6674;
+
+  --accent: #0b57a4;
+  --accent-doux: #dfeaf7;
+  --accent-encre: #ffffff;
+
+  /* Le cuivre : la couleur du chauffage. Il ne sert qu'à ça — équipements,
+     contrats d'entretien, échéances de visite — pour qu'on distingue d'un
+     coup d'œil la partie « chaudière » de la partie « plomberie ». */
+  --cuivre: #a9530f;
+  --cuivre-doux: #f7e8da;
+
+  --ok: #0e6b3d;
+  --ok-doux: #dcf1e5;
+  --avert: #8a5000;
+  --avert-doux: #fbecd6;
+  --alerte: #b3241b;
+  --alerte-doux: #fbe2e0;
+
+  --ombre-teinte: 212 45% 22%;
+}
+
+/* =============================================================================
+   SOMBRE — un vrai mode sombre, pas un mode clair inversé.
+     - le fond n'est pas noir mais très sombre légèrement bleuté ; le noir pur
+       fait vibrer le texte blanc et fatigue plus vite ;
+     - les surfaces s'ÉCLAIRCISSENT avec l'élévation au lieu de projeter une
+       ombre — une ombre noire ne se voit pas sur un fond noir ;
+     - les couleurs de sens sont désaturées et éclaircies : un rouge vif sur
+       fond sombre déborde de son trait et devient illisible.
+   ========================================================================== */
+:root[data-theme="sombre"] {
+  --bg: #0e1219;
+  --bg-creux: #090c11;
+  --surface: #161c26;
+  --surface-2: #1e2531;
+  --bord: #313a47;
+  --bord-fort: #5b6778;
+
+  --texte: #eef2f8;
+  --texte-doux: #b2bccb;
+  --texte-fantome: #92a0b1;
+
+  --accent: #74a8f0;
+  --accent-doux: #16273f;
+  --accent-encre: #06101a;
+
+  --cuivre: #e19a5e;
+  --cuivre-doux: #34220f;
+
+  --ok: #57d295;
+  --ok-doux: #103324;
+  --avert: #f2b453;
+  --avert-doux: #35270f;
+  --alerte: #ff9182;
+  --alerte-doux: #3a1a17;
+
+  --ombre-teinte: 214 60% 2%;
+  --ombre-1: 0 1px 2px hsl(var(--ombre-teinte) / .5),
+             0 2px 6px hsl(var(--ombre-teinte) / .4);
+  --ombre-2: 0 2px 8px hsl(var(--ombre-teinte) / .6),
+             0 12px 28px hsl(var(--ombre-teinte) / .5);
+}
+
+/* =============================================================================
+   NUIT — plus sombre encore, légèrement violet. Pour les écrans OLED, où un
+   fond presque noir n'allume pas les pixels, et pour les devis du soir.
+   ========================================================================== */
+:root[data-theme="nuit"] {
+  --bg: #08080e;
+  --bg-creux: #040407;
+  --surface: #11121c;
+  --surface-2: #191a27;
+  --bord: #313344;
+  --bord-fort: #5c5f7a;
+
+  --texte: #edeef7;
+  --texte-doux: #b3b6cb;
+  --texte-fantome: #9396ad;
+
+  --accent: #a596ff;
+  --accent-doux: #1c1836;
+  --accent-encre: #08080e;
+
+  --cuivre: #e6a06a;
+  --cuivre-doux: #2e2013;
+
+  --ok: #5fd6a0;
+  --ok-doux: #10301f;
+  --avert: #f0b64f;
+  --avert-doux: #322510;
+  --alerte: #ff8f8a;
+  --alerte-doux: #351a1c;
+
+  --ombre-teinte: 260 60% 1%;
+  --ombre-1: 0 1px 2px hsl(var(--ombre-teinte) / .6),
+             0 2px 6px hsl(var(--ombre-teinte) / .5);
+  --ombre-2: 0 2px 8px hsl(var(--ombre-teinte) / .7),
+             0 12px 28px hsl(var(--ombre-teinte) / .6);
+}
+
+/* =============================================================================
+   PAPIER — un blanc cassé chaud, une encre brune. Moins de bleu, donc moins de
+   fatigue sur une longue session de saisie. La palette d'un document.
+   ========================================================================== */
+:root[data-theme="papier"] {
+  --bg: #f3efe5;
+  --bg-creux: #e7e1d3;
+  --surface: #fdfbf6;
+  --surface-2: #f4f0e6;
+  --bord: #d5cdbb;
+  --bord-fort: #9d8f74;
+
+  --texte: #1e1a14;
+  --texte-doux: #4a4237;
+  --texte-fantome: #695f4e;
+
+  --accent: #1d5c86;
+  --accent-doux: #dfeaf2;
+  --accent-encre: #fdfbf6;
+
+  --cuivre: #8a4a12;
+  --cuivre-doux: #f2e6d5;
+
+  --ok: #14603a;
+  --ok-doux: #dcecdf;
+  --avert: #7d4a00;
+  --avert-doux: #f6e7cd;
+  --alerte: #a8281c;
+  --alerte-doux: #f6ded9;
+
+  --ombre-teinte: 34 40% 22%;
+}
+
+/* =============================================================================
+   ARDOISE — un gris neutre et un cyan froid, sans bleu marine.
+   ========================================================================== */
+:root[data-theme="ardoise"] {
+  --bg: #171a1f;
+  --bg-creux: #111316;
+  --surface: #1f232a;
+  --surface-2: #272c34;
+  --bord: #39404a;
+  --bord-fort: #646c79;
+
+  --texte: #eef0f3;
+  --texte-doux: #b3b9c2;
+  --texte-fantome: #949ba6;
+
+  --accent: #6fc7dc;
+  --accent-doux: #17313a;
+  --accent-encre: #0b1418;
+
+  --cuivre: #dc9a63;
+  --cuivre-doux: #33220f;
+
+  --ok: #58d296;
+  --ok-doux: #123024;
+  --avert: #efb356;
+  --avert-doux: #322610;
+  --alerte: #ff9385;
+  --alerte-doux: #371a17;
+
+  --ombre-teinte: 215 30% 3%;
+  --ombre-1: 0 1px 2px hsl(var(--ombre-teinte) / .5),
+             0 2px 6px hsl(var(--ombre-teinte) / .4);
+  --ombre-2: 0 2px 8px hsl(var(--ombre-teinte) / .6),
+             0 12px 28px hsl(var(--ombre-teinte) / .5);
+}
+
+/* =============================================================================
+   CONTRASTE CLAIR — noir sur blanc, traits doublés, aucune nuance.
+
+   Ce n'est pas une variante esthétique : c'est la palette de quelqu'un qui ne
+   distingue plus un gris moyen d'un gris clair, ou qui lit son écran en plein
+   soleil sur un chantier. Tout y est poussé à 7:1, les surfaces sont toutes
+   blanches, et les bordures portent seules la structure — d'où leur épaisseur
+   doublée.
+   ========================================================================== */
+:root[data-theme="contraste-clair"] {
+  --bg: #ffffff;
+  --bg-creux: #f0f0f0;
+  --surface: #ffffff;
+  --surface-2: #f7f7f7;
+  --bord: #767676;
+  --bord-fort: #1a1a1a;
+
+  --texte: #000000;
+  --texte-doux: #1a1a1a;
+  --texte-fantome: #333333;
+
+  --accent: #0b3bb5;
+  --accent-doux: #dde5fb;
+  --accent-encre: #ffffff;
+
+  --cuivre: #7a3a00;
+  --cuivre-doux: #f5e6d6;
+
+  --ok: #0a5c33;
+  --ok-doux: #daeee2;
+  --avert: #6e3f00;
+  --avert-doux: #f7e8cf;
+  --alerte: #a30d0d;
+  --alerte-doux: #fadedd;
+
+  --trait: 2px;
+  --trait-fort: 3px;
+  --ombre-1: none;
+  --ombre-2: 0 0 0 3px #000000;
+  --ombre-teinte: 0 0% 0%;
+}
+
+/* =============================================================================
+   CONTRASTE SOMBRE — blanc sur noir, la même logique inversée.
+   ========================================================================== */
+:root[data-theme="contraste-sombre"] {
+  --bg: #000000;
+  --bg-creux: #0d0d0d;
+  --surface: #000000;
+  --surface-2: #121212;
+  --bord: #8a8a8a;
+  --bord-fort: #f0f0f0;
+
+  --texte: #ffffff;
+  --texte-doux: #f0f0f0;
+  --texte-fantome: #d6d6d6;
+
+  --accent: #8ab6ff;
+  --accent-doux: #0d1c33;
+  --accent-encre: #000000;
+
+  --cuivre: #ffb87a;
+  --cuivre-doux: #2b1a09;
+
+  --ok: #6ee5a6;
+  --ok-doux: #0b2a1b;
+  --avert: #ffc766;
+  --avert-doux: #2e2210;
+  --alerte: #ff9e91;
+  --alerte-doux: #331615;
+
+  --trait: 2px;
+  --trait-fort: 3px;
+  --ombre-1: none;
+  --ombre-2: 0 0 0 3px #ffffff;
+  --ombre-teinte: 0 0% 0%;
+}

@@ -1,0 +1,1127 @@
+/* =============================================================================
+   components.css — les briques d'interface.
+
+   Une brique = une classe racine, ses éléments en `__`, ses variantes en `--`.
+   Aucune de ces règles ne connaît la page qui l'emploie : la même `.ligne` sert
+   la liste des clients, celle des devis et celle des factures.
+   ========================================================================== */
+
+/* ================================== Cartes ================================ */
+.carte {
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+  box-shadow: var(--ombre-1);
+  overflow: hidden;
+}
+
+.carte__tete {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: var(--trait) solid var(--bord);
+}
+
+.carte__titre {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-relief);
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.carte__sous-titre { font-size: var(--t-note); font-weight: 500; color: var(--texte-fantome); }
+.carte__corps { padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+.carte__corps--serre { padding: 0; }
+
+.carte__pied {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-2);
+  border-top: var(--trait) solid var(--bord);
+}
+
+/* Une carte qui porte une alerte prend un liseré coloré en haut, pas un fond
+   teinté : le fond aurait rendu le texte moins lisible, le liseré se voit de
+   loin sans rien coûter au contraste. */
+.carte--alerte { border-top: 3px solid var(--alerte); }
+.carte--avert { border-top: 3px solid var(--avert); }
+.carte--ok { border-top: 3px solid var(--ok); }
+.carte--cuivre { border-top: 3px solid var(--cuivre); }
+
+/* ================================= Grilles ================================ */
+.grille { display: grid; gap: var(--sp-3); }
+.grille--2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grille--3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.grille--4 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.grille--large { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+
+.rang { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.rang--fin { justify-content: flex-end; }
+.rang--entre { justify-content: space-between; }
+.pousse { margin-left: auto; }
+
+/* ================================== Champs ================================ */
+.champ { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+.champ__label {
+  font-size: var(--t-note);
+  font-weight: 700;
+  color: var(--texte-doux);
+  letter-spacing: .01em;
+}
+
+.champ__aide { font-size: var(--t-micro); line-height: 1.45; color: var(--texte-fantome); }
+.champ__aide--alerte { color: var(--alerte); font-weight: 600; }
+
+/* Un champ avec un suffixe collé — « 65 € », « 20 % », « 1,5 h ». Le suffixe
+   est DANS le cadre : à côté, il se lisait comme un mot de la ligne suivante. */
+.champ__boite {
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: var(--trait) solid var(--bord-fort);
+  border-radius: var(--r-md);
+  transition: border-color var(--vite), box-shadow var(--vite);
+}
+
+.champ__boite:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-doux), 0 0 0 4px var(--accent);
+}
+
+.champ__boite .saisie {
+  border: 0;
+  background: none;
+  border-radius: var(--r-md) 0 0 var(--r-md);
+}
+
+.champ__boite .saisie:focus { box-shadow: none; }
+
+.champ__unite {
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  flex: none;
+  background: var(--surface-2);
+  border-left: var(--trait) solid var(--bord);
+  color: var(--texte-fantome);
+  font-size: var(--t-petit);
+  font-weight: 700;
+}
+
+/* Une case à cocher qui reste une vraie case, mais dont toute la ligne est
+   cliquable : sur un téléphone, viser un carré de 16 px avec un gant est
+   perdu d'avance. */
+.coche {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  min-height: var(--cible);
+  padding: 8px 10px;
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background-color var(--vite), border-color var(--vite);
+}
+
+.coche:hover { background: var(--surface-2); }
+.coche--actif { background: var(--accent-doux); border-color: var(--accent); }
+
+.coche input { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--accent); }
+.coche__texte { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.coche__nom { font-size: var(--t-petit); font-weight: 600; }
+.coche__note { font-size: var(--t-micro); color: var(--texte-fantome); line-height: 1.4; }
+
+/* =============================== Segments =================================
+   Deux à quatre choix exclusifs, courts. Au-delà, c'est un <select> : un
+   segment à six cases devient illisible dès que le texte grandit. */
+.segment {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--bg-creux);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-md);
+  gap: 2px;
+}
+
+.segment__item {
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  color: var(--texte-doux);
+  font-size: var(--t-petit);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--vite), color var(--vite);
+}
+
+.segment__item:hover { color: var(--texte); }
+
+.segment__item--actif {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: var(--ombre-1);
+}
+
+/* ================================ États ===================================
+   Une pastille d'état porte TOUJOURS un mot, jamais une couleur seule. La
+   couleur accélère la lecture pour ceux qui la voient ; le mot la garantit
+   pour les autres. */
+.etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  background: var(--bg-creux);
+  color: var(--texte-doux);
+  border: var(--trait) solid transparent;
+}
+
+.etat::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  flex: none;
+}
+
+.etat--ok { background: var(--ok-doux); color: var(--ok); }
+.etat--avert { background: var(--avert-doux); color: var(--avert); }
+.etat--alerte { background: var(--alerte-doux); color: var(--alerte); }
+.etat--info { background: var(--accent-doux); color: var(--accent); }
+.etat--cuivre { background: var(--cuivre-doux); color: var(--cuivre); }
+.etat--neutre { background: var(--bg-creux); color: var(--texte-fantome); }
+
+/* Une étiquette libre : type d'intervention, tag client, unité. Pas de point
+   devant, à la différence d'un état — ce n'est pas un statut. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--surface-2);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-sm);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+
+.tag--accent { background: var(--accent-doux); border-color: transparent; color: var(--accent); }
+.tag--cuivre { background: var(--cuivre-doux); border-color: transparent; color: var(--cuivre); }
+
+/* ================================== KPI ===================================
+   Les quatre chiffres du tableau de bord. Le chiffre d'abord, l'étiquette
+   ensuite : on les lit dans cet ordre, autant les écrire dans cet ordre. */
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+  box-shadow: var(--ombre-1);
+  text-align: left;
+  min-width: 0;
+}
+
+.kpi--cliquable { cursor: pointer; transition: border-color var(--vite), transform var(--vite); }
+.kpi--cliquable:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+.kpi__valeur {
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-grand);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  line-height: 1.1;
+}
+
+.kpi__valeur--ok { color: var(--ok); }
+.kpi__valeur--alerte { color: var(--alerte); }
+.kpi__valeur--avert { color: var(--avert); }
+
+.kpi__label {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.kpi__detail { font-size: var(--t-note); color: var(--texte-doux); line-height: 1.4; }
+
+/* Sur téléphone, les pastilles de chiffres se mettent DEUX par ligne, quelle
+   que soit la grille qui les porte. Empilées une par une, trois indicateurs
+   occupaient tout l'écran et la liste qu'ils résument passait sous la ligne de
+   flottaison — on ne voyait plus que le résumé. */
+@media (max-width: 560px) {
+  .grille:has(> .kpi) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2); }
+  .kpi { padding: var(--sp-3); }
+  .kpi__valeur { font-size: var(--t-titre); }
+}
+
+/* ================================= Listes =================================
+   Une liste de lignes cliquables. Les lignes sont séparées par un trait, pas
+   par un espace : sur une liste de quarante factures, l'espace donne un tapis
+   gris où l'œil ne se raccroche à rien. */
+.liste {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.liste--nue { border: 0; border-radius: 0; background: none; }
+
+.ligne {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: var(--trait) solid var(--bord);
+  text-align: left;
+  color: inherit;
+  background: none;
+  transition: background-color var(--vite);
+}
+
+.liste .ligne:last-child { border-bottom: 0; }
+.ligne--cliquable { cursor: pointer; }
+.ligne--cliquable:hover { background: var(--surface-2); }
+
+/* La barre verticale colorée à gauche d'une ligne : c'est le seul endroit où
+   une couleur seule est admise, parce qu'elle double toujours une pastille
+   d'état posée sur la même ligne. */
+.ligne--marque { border-left: 3px solid var(--bord-fort); }
+.ligne--marque-ok { border-left-color: var(--ok); }
+.ligne--marque-avert { border-left-color: var(--avert); }
+.ligne--marque-alerte { border-left-color: var(--alerte); }
+.ligne--marque-info { border-left-color: var(--accent); }
+.ligne--marque-cuivre { border-left-color: var(--cuivre); }
+
+.ligne__icone {
+  display: grid;
+  place-items: center;
+  width: 36px; height: 36px;
+  flex: none;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  color: var(--texte-fantome);
+}
+
+.ligne__icone--accent { background: var(--accent-doux); color: var(--accent); }
+.ligne__icone--cuivre { background: var(--cuivre-doux); color: var(--cuivre); }
+.ligne__icone--ok { background: var(--ok-doux); color: var(--ok); }
+.ligne__icone--alerte { background: var(--alerte-doux); color: var(--alerte); }
+
+.ligne__corps { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.ligne__titre {
+  font-size: var(--t-corps);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ligne__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  font-size: var(--t-note);
+  color: var(--texte-fantome);
+}
+
+.ligne__meta > * { white-space: nowrap; }
+
+.ligne__droite {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex: none;
+  text-align: right;
+}
+
+.ligne__montant {
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-corps);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.ligne__montant--ok { color: var(--ok); }
+.ligne__montant--alerte { color: var(--alerte); }
+.ligne__actions { display: flex; gap: 2px; flex: none; }
+
+/* Sur téléphone, une ligne de liste RESPIRE au lieu de tronquer.
+
+   Le titre passe sur deux lignes plutôt que de finir en « FA-2026-0007 —
+   Entretie… » : un numéro de facture coupé ne sert à personne. Les métadonnées
+   perdent leur `nowrap`, faute de quoi une adresse longue poussait les boutons
+   d'action par-dessus le texte. */
+@media (max-width: 560px) {
+  .ligne { padding: var(--sp-3); gap: var(--sp-2); }
+  .ligne__montant { font-size: var(--t-petit); }
+
+  .ligne__titre {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    /* Deux lignes, puis les points de suspension : au-delà, une liste de
+       trente factures ne se balaie plus du pouce. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .ligne__meta { gap: 2px var(--sp-2); }
+  .ligne__meta > * { white-space: normal; overflow-wrap: anywhere; }
+  .ligne__droite { max-width: 45%; }
+}
+
+/* ============================== État vide =================================
+   Un écran vide dit CE QU'ON PEUT Y FAIRE. Un « aucune donnée » laisse
+   l'utilisateur devant une impasse ; un bouton lui donne la sortie. */
+.vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4);
+  text-align: center;
+  color: var(--texte-fantome);
+}
+
+.vide__icone { opacity: .4; }
+.vide__titre { font-size: var(--t-relief); font-weight: 700; color: var(--texte-doux); }
+.vide__texte { max-width: 44ch; font-size: var(--t-petit); line-height: 1.6; }
+
+/* =============================== Recherche ================================ */
+.barre-outils {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.recherche { position: relative; flex: 1; min-width: 200px; }
+.recherche .saisie { padding-left: 38px; }
+
+.recherche__icone {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--texte-fantome);
+  pointer-events: none;
+}
+
+.recherche__vider {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  color: var(--texte-fantome);
+  cursor: pointer;
+}
+
+.recherche__vider:hover { background: var(--bg-creux); color: var(--texte); }
+
+/* Les filtres en pastilles : on voit d'un coup ce qui est actif, et on
+   l'annule d'un clic. Un menu déroulant cache l'état du filtre, et c'est la
+   première cause de « il me manque des factures ». */
+.filtres { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 4px 11px;
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-pill);
+  color: var(--texte-doux);
+  font-size: var(--t-note);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--vite), border-color var(--vite), color var(--vite);
+}
+
+.filtre:hover { border-color: var(--bord-fort); color: var(--texte); }
+.filtre--actif { background: var(--accent); border-color: var(--accent); color: var(--accent-encre); }
+
+.filtre__compte {
+  font-family: var(--font-chiffre);
+  font-size: var(--t-micro);
+  opacity: .75;
+}
+
+/* ============================== Sections ==================================
+   Un titre de section dans une page, plus léger qu'un titre de carte. */
+.section__titre {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+  padding-top: var(--sp-2);
+}
+
+.section__titre::after {
+  content: "";
+  flex: 1;
+  height: var(--trait);
+  background: var(--bord);
+}
+
+/* ================================ Replis ================================== */
+.repli {
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.repli__tete {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--cible);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--t-petit);
+  font-weight: 700;
+  color: var(--texte-doux);
+  cursor: pointer;
+  list-style: none;
+}
+
+.repli__tete::-webkit-details-marker { display: none; }
+
+.repli__tete::after {
+  content: "";
+  margin-left: auto;
+  width: 8px; height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--vite);
+}
+
+.repli[open] .repli__tete::after { transform: rotate(225deg) translate(-3px, -3px); }
+.repli[open] .repli__tete { border-bottom: var(--trait) solid var(--bord); }
+
+.repli__corps { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); }
+
+/* ============================== Définitions ===============================
+   Les paires « libellé / valeur » d'une fiche client ou d'un récapitulatif. */
+.defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-3); }
+.def { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+.def__label {
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.def__valeur { font-size: var(--t-petit); line-height: 1.5; overflow-wrap: anywhere; }
+.def__valeur--vide { color: var(--texte-fantome); font-style: italic; }
+
+/* ============================== Calendrier ================================
+   La grille du mois. Chaque case est un bouton : on clique un jour pour le
+   voir, on clique une pastille pour ouvrir le rendez-vous. */
+.cal { border: var(--trait) solid var(--bord); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
+
+.cal__entetes {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: var(--surface-2);
+  border-bottom: var(--trait) solid var(--bord);
+}
+
+.cal__entete {
+  padding: 7px 4px;
+  text-align: center;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.cal__grille { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+
+.cal__jour {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 104px;
+  padding: 5px;
+  border-right: var(--trait) solid var(--bord);
+  border-bottom: var(--trait) solid var(--bord);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--vite);
+}
+
+.cal__jour:nth-child(7n) { border-right: 0; }
+.cal__jour:hover { background: var(--surface-2); }
+.cal__jour--hors { background: var(--bg-creux); opacity: .55; }
+.cal__jour--weekend { background: color-mix(in srgb, var(--bg-creux) 45%, var(--surface)); }
+.cal__jour--ferie { background: var(--avert-doux); }
+.cal__jour--choisi { box-shadow: inset 0 0 0 2px var(--accent); }
+
+.cal__num {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-note);
+  font-weight: 700;
+  color: var(--texte-doux);
+}
+
+/* Aujourd'hui : une pastille pleine autour du numéro. C'est le repère qu'on
+   cherche en premier en ouvrant le mois. */
+.cal__num--auj {
+  display: grid;
+  place-items: center;
+  width: 22px; height: 22px;
+  background: var(--accent);
+  color: var(--accent-encre);
+  border-radius: var(--r-pill);
+}
+
+.cal__ferie { font-size: 9px; font-weight: 700; color: var(--avert); text-transform: uppercase; letter-spacing: .04em; }
+.cal__evts { display: flex; flex-direction: column; gap: 2px; min-height: 0; }
+
+.cal__evt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--accent-doux);
+  color: var(--accent);
+  font-size: var(--t-micro);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.cal__evt--depannage { background: var(--alerte-doux); color: var(--alerte); }
+.cal__evt--entretien { background: var(--cuivre-doux); color: var(--cuivre); }
+.cal__evt--installation { background: var(--accent-doux); color: var(--accent); }
+.cal__evt--visite { background: var(--ok-doux); color: var(--ok); }
+.cal__evt--perso { background: var(--bg-creux); color: var(--texte-fantome); }
+.cal__evt--fait { opacity: .55; text-decoration: line-through; }
+.cal__evt--annule { opacity: .45; text-decoration: line-through; }
+.cal__evt-heure { font-family: var(--font-chiffre); font-size: 10px; opacity: .85; flex: none; }
+.cal__plus { font-size: 10px; font-weight: 700; color: var(--texte-fantome); padding-left: 5px; }
+
+/* Sur téléphone la grille du mois ne montre plus les titres, seulement des
+   points de couleur : six caractères tronqués ne renseignent personne, un
+   point dit « il y a quelque chose ce jour-là », ce qui est l'information. */
+@media (max-width: 760px) {
+  .cal__jour { min-height: 62px; padding: 3px; }
+  .cal__evt { padding: 0; height: 5px; border-radius: var(--r-pill); }
+  .cal__evt-texte, .cal__evt-heure { display: none; }
+  .cal__evt { background: var(--accent); }
+  .cal__evt--depannage { background: var(--alerte); }
+  .cal__evt--entretien { background: var(--cuivre); }
+  .cal__evt--visite { background: var(--ok); }
+  .cal__evt--perso { background: var(--bord-fort); }
+  .cal__ferie { display: none; }
+}
+
+/* ============================== Journée ===================================
+   La liste des rendez-vous d'un jour, avec une colonne d'heures à gauche. La
+   colonne est en chasse fixe : c'est ce qui permet de balayer la journée
+   verticalement sans lire. */
+.jour { display: flex; flex-direction: column; }
+
+.jour__creneau {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: var(--trait) solid var(--bord);
+  cursor: pointer;
+  transition: background-color var(--vite);
+}
+
+.jour__creneau:last-child { border-bottom: 0; }
+.jour__creneau:hover { background: var(--surface-2); }
+
+.jour__heure {
+  flex: none;
+  width: 52px;
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-petit);
+  font-weight: 700;
+  color: var(--texte-doux);
+  line-height: 1.5;
+}
+
+.jour__fin { display: block; font-size: var(--t-micro); font-weight: 500; color: var(--texte-fantome); }
+
+.jour__barre {
+  flex: none;
+  width: 4px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+}
+
+.jour__barre--depannage { background: var(--alerte); }
+.jour__barre--entretien { background: var(--cuivre); }
+.jour__barre--installation { background: var(--accent); }
+.jour__barre--visite { background: var(--ok); }
+.jour__barre--sav { background: var(--avert); }
+.jour__barre--perso { background: var(--bord-fort); }
+
+.jour__corps { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.jour__titre { font-weight: 600; }
+.jour__meta { display: flex; gap: var(--sp-2); flex-wrap: wrap; font-size: var(--t-note); color: var(--texte-fantome); }
+
+/* ============================ Lignes de devis =============================
+   L'éditeur de lignes. En large, une grille de colonnes alignées ; en étroit,
+   chaque ligne devient une petite carte — un tableau à sept colonnes sur un
+   téléphone est illisible, et surtout intapable. */
+.lignes { display: flex; flex-direction: column; }
+
+/* Huit colonnes, et l'en-tete en compte huit lui aussi : designation, quantite,
+   unite, prix unitaire, remise, TVA, total, suppression. Une colonne d'ecart
+   entre l'en-tete et les lignes decale tous les libelles d'un cran, ce qui ne
+   se voit pas tout de suite et fausse la relecture d'un devis. */
+.lignes__tete {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 68px 78px 104px 80px 92px 104px 36px;
+  gap: var(--sp-2);
+  padding: 6px var(--sp-3);
+  background: var(--surface-2);
+  border-bottom: var(--trait) solid var(--bord);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+}
+
+.lignes__tete > *:not(:first-child) { text-align: right; }
+
+.lgn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 68px 78px 104px 80px 92px 104px 36px;
+  gap: var(--sp-2);
+  align-items: start;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: var(--trait) solid var(--bord);
+}
+
+.lgn:hover { background: color-mix(in srgb, var(--surface-2) 60%, transparent); }
+
+.lgn__total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 36px;
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--t-petit);
+}
+
+.lgn__label { display: none; }
+
+/* Une ligne de titre de section dans un devis : pas de quantité, pas de prix,
+   juste un intertitre qui structure un chantier long. */
+.lgn--section { grid-template-columns: 1fr 36px; background: var(--bg-creux); }
+.lgn--section .saisie { font-weight: 700; }
+.lgn--texte { grid-template-columns: 1fr 36px; }
+
+@media (max-width: 860px) {
+  .lignes__tete { display: none; }
+
+  .lgn, .lgn--section, .lgn--texte {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-2);
+    padding: var(--sp-3);
+    background: var(--surface);
+    border: var(--trait) solid var(--bord);
+    border-radius: var(--r-md);
+    margin-bottom: var(--sp-2);
+  }
+
+  .lgn > .champ--designation { grid-column: 1 / -1; }
+  .lgn__label { display: block; font-size: var(--t-micro); font-weight: 700; color: var(--texte-fantome); }
+  .lgn__total { grid-column: 1 / -1; justify-content: space-between; border-top: var(--trait) solid var(--bord); padding-top: var(--sp-2); }
+  .lgn__total::before { content: "Total HT"; font-size: var(--t-micro); font-weight: 700; color: var(--texte-fantome); text-transform: uppercase; letter-spacing: .05em; }
+  .lgn__sup { grid-column: 1 / -1; justify-self: end; }
+}
+
+/* ================================ Totaux ==================================
+   Le bloc de totaux, aligné à droite. Le TTC est le seul chiffre en gros : un
+   client regarde ce nombre-là, et l'artisan le vérifie en dernier. */
+.totaux {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: auto;
+  width: min(360px, 100%);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-2);
+  border: var(--trait) solid var(--bord);
+  border-radius: var(--r-lg);
+}
+
+.totaux__ligne {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--t-petit);
+}
+
+.totaux__label { color: var(--texte-doux); }
+
+.totaux__valeur {
+  font-family: var(--font-chiffre);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.totaux__ligne--fort {
+  margin-top: 5px;
+  padding-top: 8px;
+  border-top: var(--trait-fort) solid var(--bord-fort);
+  font-size: var(--t-relief);
+}
+
+.totaux__ligne--fort .totaux__label { color: var(--texte); font-weight: 700; }
+.totaux__ligne--fort .totaux__valeur { font-size: var(--t-titre); font-weight: 700; letter-spacing: -.03em; }
+.totaux__ligne--note { font-size: var(--t-micro); color: var(--texte-fantome); }
+.totaux__ligne--acompte { color: var(--accent); font-weight: 700; }
+
+/* =============================== Tableaux ================================= */
+.tableau { width: 100%; border-collapse: collapse; font-size: var(--t-petit); }
+
+.tableau th {
+  padding: 8px var(--sp-3);
+  background: var(--surface-2);
+  border-bottom: var(--trait) solid var(--bord);
+  text-align: left;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--texte-fantome);
+  white-space: nowrap;
+}
+
+.tableau td { padding: 8px var(--sp-3); border-bottom: var(--trait) solid var(--bord); }
+.tableau tr:last-child td { border-bottom: 0; }
+.tableau .num { text-align: right; font-family: var(--font-chiffre); font-variant-numeric: tabular-nums; }
+.tableau__defile { overflow-x: auto; }
+
+/* ============================== Histogramme ===============================
+   Le chiffre d'affaires par mois. Des barres CSS, pas une bibliothèque : douze
+   valeurs ne justifient pas 90 ko de dépendance, et celle-ci marcherait mal
+   hors ligne. */
+.histo { display: flex; align-items: flex-end; gap: 4px; height: 160px; padding-top: var(--sp-3); }
+
+.histo__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  min-width: 0;
+}
+
+/* Les deux barres sont COTE A COTE, jamais empilees. Empilees, elles se
+   liraient comme une somme — or « facturé » et « encaissé » decrivent le meme
+   argent a deux moments differents : les additionner ne veut rien dire. */
+.histo__barres {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  gap: 2px;
+}
+
+.histo__barre {
+  flex: 1;
+  min-width: 3px;
+  min-height: 2px;
+  background: var(--accent);
+  border-radius: 3px 3px 0 0;
+  transition: height var(--lent);
+}
+
+.histo__barre--encaisse { background: var(--ok); }
+
+.histo__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--texte-fantome);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.histo__valeur {
+  font-family: var(--font-chiffre);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+
+.legende { display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--t-note); color: var(--texte-doux); }
+.legende__item { display: inline-flex; align-items: center; gap: 6px; }
+.legende__puce { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+/* =============================== Jauge ==================================== */
+.jauge { height: 8px; background: var(--bg-creux); border-radius: var(--r-pill); overflow: hidden; }
+.jauge__part { height: 100%; background: var(--accent); border-radius: var(--r-pill); transition: width var(--lent); }
+.jauge__part--ok { background: var(--ok); }
+.jauge__part--alerte { background: var(--alerte); }
+
+/* ============================== Équipements ===============================
+   Une chaudière, un chauffe-eau, une PAC. Bordure cuivre : c'est la couleur du
+   chauffage dans toute l'application. */
+.equip {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: var(--trait) solid var(--bord);
+  border-left: 3px solid var(--cuivre);
+  border-radius: var(--r-md);
+}
+
+.equip__corps { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.equip__nom { font-weight: 700; font-size: var(--t-petit); }
+.equip__meta { font-size: var(--t-micro); color: var(--texte-fantome); line-height: 1.5; }
+
+/* ============================== Document ==================================
+   L'aperçu d'un devis ou d'une facture. Il ressemble à la feuille A4 qui
+   sortira de l'imprimante : mêmes marges, même ordre, mêmes mentions. Ce n'est
+   pas de la coquetterie — c'est ce qui permet de relire un devis avant de
+   l'envoyer sans se demander « à quoi va-t-il ressembler ». */
+.doc {
+  background: #ffffff;
+  color: #111318;
+  padding: 18mm 16mm;
+  border-radius: var(--r-md);
+  box-shadow: var(--ombre-2);
+  font-size: 11.5px;
+  line-height: 1.5;
+  max-width: 210mm;
+  margin: 0 auto;
+}
+
+.doc__tete { display: flex; justify-content: space-between; gap: var(--sp-5); align-items: flex-start; }
+.doc__logo { max-height: 68px; max-width: 190px; object-fit: contain; }
+.doc__emetteur { font-size: 11px; line-height: 1.5; }
+.doc__emetteur strong { font-size: 15px; letter-spacing: -.01em; }
+
+.doc__titre {
+  text-align: right;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: #0b57a4;
+  text-transform: uppercase;
+}
+
+.doc__numero { text-align: right; font-family: var(--font-chiffre); font-size: 12px; font-weight: 700; }
+.doc__dates { text-align: right; font-size: 11px; color: #4a5260; }
+
+.doc__parties { display: flex; justify-content: space-between; gap: var(--sp-5); margin-top: 14mm; }
+
+.doc__bloc {
+  min-width: 62mm;
+  padding: 8px 10px;
+  border: 1px solid #d5dbe4;
+  border-radius: 4px;
+}
+
+.doc__bloc-titre {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #6a7180;
+  margin-bottom: 3px;
+}
+
+.doc__objet { margin-top: 8mm; font-size: 12px; }
+.doc__objet strong { display: block; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: #6a7180; }
+
+.doc__table { width: 100%; border-collapse: collapse; margin-top: 6mm; font-size: 11px; }
+
+.doc__table th {
+  padding: 6px 6px;
+  background: #eef2f8;
+  border-bottom: 1.5px solid #0b57a4;
+  text-align: left;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #34506f;
+}
+
+.doc__table td { padding: 5px 6px; border-bottom: 1px solid #e4e8ef; vertical-align: top; }
+.doc__table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc__table tr.doc__section td { background: #f4f6fa; font-weight: 700; padding-top: 8px; }
+.doc__table tr.doc__texte td { color: #4a5260; font-style: italic; }
+.doc__ligne-note { display: block; color: #6a7180; font-size: 10px; }
+
+.doc__bas { display: flex; justify-content: space-between; gap: var(--sp-5); margin-top: 6mm; align-items: flex-start; }
+.doc__tva { font-size: 10px; border-collapse: collapse; }
+.doc__tva th, .doc__tva td { padding: 3px 8px 3px 0; text-align: right; }
+.doc__tva th { font-size: 9px; text-transform: uppercase; color: #6a7180; }
+
+.doc__totaux { min-width: 66mm; }
+.doc__total-ligne { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-variant-numeric: tabular-nums; }
+
+.doc__total-ligne--ttc {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1.5px solid #0b57a4;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b57a4;
+}
+
+.doc__mentions { margin-top: 8mm; font-size: 9.5px; line-height: 1.55; color: #4a5260; }
+.doc__mentions h4 { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #111318; margin-bottom: 2px; }
+.doc__mentions p { margin-bottom: 5px; }
+
+.doc__signature {
+  margin-top: 8mm;
+  padding: 8px 10px;
+  border: 1px dashed #9aa3b1;
+  border-radius: 4px;
+  font-size: 10px;
+  min-height: 26mm;
+}
+
+.doc__pied { margin-top: 8mm; padding-top: 4px; border-top: 1px solid #d5dbe4; font-size: 8.5px; color: #6a7180; text-align: center; line-height: 1.5; }
+
+/* `screen and` explicitement : sans ce mot, la règle s'appliquerait aussi à
+   l'impression si le pilote annonçait une page étroite, et le devis sortirait
+   du papier avec sa mise en page de téléphone. */
+@media screen and (max-width: 760px) {
+  .doc { padding: 10mm 7mm; font-size: 10.5px; }
+
+  /* Sur un téléphone, l'en-tête et les blocs d'adresse passent l'un sous
+     l'autre : côte à côte, il ne reste pas 40 mm par colonne et le nom de
+     l'entreprise se coupe au milieu d'un mot. La feuille IMPRIMÉE, elle, ne
+     change pas — print.css rétablit la largeur A4. */
+  .doc__tete, .doc__parties, .doc__bas { flex-direction: column; gap: var(--sp-3); }
+  .doc__titre, .doc__numero, .doc__dates { text-align: left; }
+  .doc__bloc { min-width: 0; }
+  .doc__totaux { min-width: 0; width: 100%; }
+  .doc__table { table-layout: fixed; }
+  .doc__table td:first-child { overflow-wrap: anywhere; }
+}
+
+/* ============================== Chargement ================================ */
+.squelette {
+  background: linear-gradient(90deg, var(--bg-creux) 25%, var(--surface-2) 50%, var(--bg-creux) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--r-md);
+  animation: glisse 1.4s infinite;
+}
+
+@keyframes glisse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* =============================== Suggestions ==============================
+   La liste qui tombe sous un champ de recherche client ou catalogue. */
+.auto { position: relative; }
+
+.auto__liste {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  z-index: 20;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: var(--trait) solid var(--bord-fort);
+  border-radius: var(--r-md);
+  box-shadow: var(--ombre-2);
+}
+
+.auto__item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 8px 12px;
+  border-bottom: var(--trait) solid var(--bord);
+  text-align: left;
+  cursor: pointer;
+}
+
+.auto__item:last-child { border-bottom: 0; }
+.auto__item:hover, .auto__item--vise { background: var(--accent-doux); }
+.auto__nom { font-size: var(--t-petit); font-weight: 600; }
+.auto__note { font-size: var(--t-micro); color: var(--texte-fantome); }
+
+/* ============================== Aide en ligne =============================
+   Un encadré d'explication. Il n'a pas de fond coloré : dans une page qui en
+   contient trois, la couleur cesse d'attirer l'œil et ne fait plus que
+   fatiguer. Un trait à gauche suffit. */
+.aide {
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: var(--t-note);
+  line-height: 1.55;
+  color: var(--texte-doux);
+}
+
+.aide--avert { border-left-color: var(--avert); }
+.aide--alerte { border-left-color: var(--alerte); }
+.aide strong { color: var(--texte); }

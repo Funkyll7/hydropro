@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Clé de 12 — vérification</title>
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; max-width: 54rem; margin: 2rem auto; padding: 0 1rem; color: #14181f; }
+  h1 { font-size: 1.5rem; margin-bottom: .2rem; }
+  h2 { font-size: 1rem; margin: 1.6rem 0 .4rem; text-transform: uppercase; letter-spacing: .08em; color: #5b6674; }
+  p.intro { color: #3c4653; }
+  #bilan { margin: 1rem 0; padding: .8rem 1rem; border-radius: 8px; font-weight: 700; }
+  .ok { background: #dcf1e5; color: #0e6b3d; }
+  .ko { background: #fbe2e0; color: #b3241b; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { padding: 3px 0; border-bottom: 1px solid #e7ecf3; display: flex; gap: .6rem; }
+  li b { flex: none; font-family: ui-monospace, monospace; }
+  li.echec { color: #b3241b; }
+  code { background: #eef2f8; padding: 1px 5px; border-radius: 4px; font-size: .85em; }
+</style>
+</head>
+<body>
+<h1>Vérification</h1>
+<p class="intro">
+  Cette page exécute les contrôles qu'on ne peut pas faire à l'œil : le calcul des documents,
+  les dates, la numérotation, et surtout la <strong>liste du cache hors ligne</strong>.
+  Cette dernière est atomique — un seul fichier manquant dans <code>sw.js</code> fait échouer
+  toute l'installation du mode hors ligne, <em>sans le moindre message</em>, puisque le site
+  continue de marcher en ligne. À relancer après chaque ajout ou renommage de fichier.
+</p>
+
+<div id="bilan">Exécution…</div>
+<div id="sortie"></div>
+
+<script type="module">
+import { arrondi, ajouteMois, aujourdhui, enLettres, isoJour, joursEntre, nombre, normalise } from "../assets/js/core/format.js";
+import { feries, grilleMois, paques, conflits } from "../assets/js/domain/agenda.js";
+import { calculer, statutEffectif, penalites } from "../assets/js/domain/documents.js";
+import { documentVide, ligneVide, dossierVide, normaliser } from "../assets/js/domain/dossier.js";
+import { attribuerNumero, prochainNumero, trous, doublons } from "../assets/js/domain/numerotation.js";
+import { prochaineVisite, caRecurrent } from "../assets/js/domain/contrats.js";
+import { chiffreAffaires } from "../assets/js/domain/stats.js";
+import { marge, tauxHoraireMinimum } from "../assets/js/domain/catalogue.js";
+
+const sortie = document.getElementById("sortie");
+let total = 0;
+let echecs = 0;
+let groupe = null;
+
+function section(titre) {
+  const h = document.createElement("h2");
+  h.textContent = titre;
+  groupe = document.createElement("ul");
+  sortie.append(h, groupe);
+}
+
+function verifier(nom, obtenu, attendu) {
+  total += 1;
+  const a = JSON.stringify(attendu);
+  const o = JSON.stringify(obtenu);
+  const ok = a === o;
+  if (!ok) echecs += 1;
+  const li = document.createElement("li");
+  li.className = ok ? "" : "echec";
+  li.innerHTML = `<b>${ok ? "✓" : "✗"}</b><span>${nom}${ok ? "" : ` — attendu <code>${a}</code>, obtenu <code>${o}</code>`}</span>`;
+  groupe.append(li);
+}
+
+/* ============================== Les nombres ============================== */
+section("Lecture et écriture des nombres");
+verifier("« 1 234,50 » se lit 1234.5", nombre("1 234,50"), 1234.5);
+verifier("« 1 234,50 € » aussi", nombre("1 234,50 €"), 1234.5);
+verifier("l'espace insécable ne casse rien", nombre("1 234,50"), 1234.5);
+verifier("« 1234.50 » à l'anglaise", nombre("1234.50"), 1234.5);
+verifier("le vide vaut le défaut", nombre("", 7), 7);
+verifier("0,1 + 0,2 arrondi au centime", arrondi(0.1 + 0.2), 0.3);
+verifier("2,675 s'arrondit à 2,68", arrondi(2.675), 2.68);
+verifier("accents ignorés à la recherche", normalise("Chaudière"), "chaudiere");
+verifier("somme en lettres", enLettres(4933.23), "quatre mille neuf cent trente-trois euros et vingt-trois centimes");
+verifier("quatre-vingts", enLettres(80), "quatre-vingts euros");
+verifier("soixante et onze", enLettres(71), "soixante et onze euros");
+verifier("quatre-vingt-onze, sans « et »", enLettres(91), "quatre-vingt-onze euros");
+verifier("quatre-vingt-un, sans « et »", enLettres(81), "quatre-vingt-un euros");
+verifier("soixante et un", enLettres(61), "soixante et un euros");
+verifier("mille, sans « un »", enLettres(1000), "mille euros");
+verifier("deux cents", enLettres(200), "deux cents euros");
+verifier("deux cent cinq", enLettres(205), "deux cent cinq euros");
+
+/* ================================ Les dates ============================== */
+section("Dates");
+const minuit = new Date(2026, 8, 3, 0, 0, 0);
+verifier("minuit reste le bon jour (pas d'UTC)", isoJour(minuit), "2026-09-03");
+verifier("31 janvier + 1 mois = 28 février", ajouteMois("2026-01-31", 1), "2026-02-28");
+verifier("29 février existe en 2028", ajouteMois("2028-01-29", 1), "2028-02-29");
+verifier("écart en jours", joursEntre("2026-08-30", "2026-09-03"), 4);
+verifier("Pâques 2026", paques(2026), "2026-04-05");
+verifier("Pâques 2027", paques(2027), "2027-03-28");
+verifier("Ascension 2026", feries(2026)["2026-05-14"], "Ascension");
+verifier("Lundi de Pentecôte 2026", feries(2026)["2026-05-25"], "Lundi de Pentecôte");
+verifier("11 fériés par an", Object.keys(feries(2026)).length, 11);
+const grille = grilleMois(2026, 7); // août 2026
+verifier("la grille d'août 2026 commence un lundi 27 juillet", grille[0].jour, "2026-07-27");
+verifier("grille en semaines entières", grille.length % 7, 0);
+
+/* ============================== Le calcul =============================== */
+section("Calcul d'un devis");
+const entreprise = { assujettiTva: true, penalites: 12, delaiPaiement: 30 };
+const devis = documentVide("devis", {
+  date: "2026-08-10",
+  echeance: "2026-09-09",
+  remiseGlobale: { type: "pourcent", valeur: 3 },
+  acompte: { type: "pourcent", valeur: 30 },
+  statut: "envoye",
+  lignes: [
+    ligneVide({ designation: "Pose", quantite: 1, pu: 1450, tva: 20 }),
+    ligneVide({ type: "fourniture", designation: "Chaudière", quantite: 1, pu: 2350, tva: 20 }),
+    ligneVide({ type: "fourniture", designation: "Filtre", quantite: 1, pu: 185, tva: 10 }),
+    ligneVide({ designation: "Main d'œuvre", quantite: 4, pu: 62, tva: 10 }),
+    ligneVide({ designation: "Déchets", quantite: 1, pu: 45, tva: 10 }),
+    ligneVide({ type: "section", designation: "Un titre, qui ne compte pas" }),
+  ],
+});
+const calc = calculer(devis, entreprise);
+verifier("total brut HT", calc.brutHt, 4278);
+verifier("remise commerciale de 3 %", calc.remiseGlobale, 128.34);
+verifier("total HT après remise", calc.ht, 4149.66);
+verifier("deux taux de TVA", calc.tva.length, 2);
+verifier("base à 10 % réduite au prorata", calc.tva[0].base, 463.66);
+verifier("TVA à 10 %", calc.tva[0].montant, 46.37);
+verifier("base à 20 % réduite au prorata", calc.tva[1].base, 3686);
+verifier("TVA à 20 %", calc.tva[1].montant, 737.2);
+verifier("total TTC", calc.ttc, 4933.23);
+verifier("acompte de 30 %", calc.acompte, 1479.97);
+verifier("solde", calc.soldeApresAcompte, 3453.26);
+verifier("un titre de section ne compte pas", calc.detail.length, 5);
+verifier("le taux réduit est détecté", calc.tauxReduit, true);
+verifier("HT + TVA = TTC, au centime", arrondi(calc.ht + calc.totalTva), calc.ttc);
+
+section("Franchise en base de TVA");
+const calcFranchise = calculer(devis, { assujettiTva: false });
+verifier("aucune TVA facturée", calcFranchise.totalTva, 0);
+verifier("TTC égale HT", calcFranchise.ttc, calcFranchise.ht);
+verifier("aucun taux réduit signalé", calcFranchise.tauxReduit, false);
+
+section("Remise totale et division par zéro");
+const offert = documentVide("devis", {
+  remiseGlobale: { type: "pourcent", valeur: 100 },
+  lignes: [ligneVide({ quantite: 1, pu: 500, tva: 10 })],
+});
+const calcOffert = calculer(offert, entreprise);
+verifier("un document entièrement offert vaut zéro", calcOffert.ttc, 0);
+verifier("et aucune TVA", calcOffert.totalTva, 0);
+
+section("États d'un document");
+verifier("un devis dont la validité est passée est expiré",
+  statutEffectif({ ...devis, echeance: "2026-01-01", statut: "envoye" }, calc, "2026-08-30"), "expire");
+verifier("un devis encore valable reste envoyé",
+  statutEffectif({ ...devis, echeance: "2026-12-01", statut: "envoye" }, calc, "2026-08-30"), "envoye");
+const facture = documentVide("facture", {
+  statut: "envoyee", echeance: "2026-07-01",
+  lignes: [ligneVide({ quantite: 1, pu: 100, tva: 20 })],
+});
+const calcFacture = calculer(facture, entreprise);
+verifier("une facture échue est en retard", statutEffectif(facture, calcFacture, "2026-08-30"), "retard");
+const soldee = { ...facture, paiements: [{ id: "p", date: "2026-08-01", montant: 120, moyen: "virement" }] };
+verifier("une facture soldée est payée",
+  statutEffectif(soldee, calculer(soldee, entreprise), "2026-08-30"), "payee");
+const partielle = { ...facture, paiements: [{ id: "p", date: "2026-08-01", montant: 50, moyen: "virement" }] };
+verifier("un règlement partiel est signalé",
+  statutEffectif(partielle, calculer(partielle, entreprise), "2026-08-30"), "partielle");
+const pen = penalites(facture, calcFacture, entreprise, "2026-07-31");
+verifier("30 jours de retard", pen.jours, 30);
+verifier("pénalités à 12 % l'an sur 30 jours", pen.montant, arrondi((120 * 0.12 * 30) / 365));
+
+/* ============================ La numérotation ============================ */
+section("Numérotation");
+const d = dossierVide();
+verifier("le premier numéro de l'année", prochainNumero(d, "facture", "2026-08-30"), "FA-2026-0001");
+verifier("proposer un numéro ne le consomme pas", prochainNumero(d, "facture", "2026-08-30"), "FA-2026-0001");
+verifier("attribuer le consomme", attribuerNumero(d, "facture", "2026-08-30"), "FA-2026-0001");
+verifier("le suivant s'incrémente", attribuerNumero(d, "facture", "2026-09-01"), "FA-2026-0002");
+verifier("chaque année repart à 1", attribuerNumero(d, "facture", "2027-01-04"), "FA-2027-0001");
+verifier("les devis ont leur propre séquence", attribuerNumero(d, "devis", "2026-08-30"), "DEV-2026-0001");
+d.documents = [
+  documentVide("facture", { numero: "FA-2026-0001" }),
+  documentVide("facture", { numero: "FA-2026-0003" }),
+];
+verifier("un trou est repéré", trous(d, "facture", "2026"), ["FA-2026-0002"]);
+d.documents.push(documentVide("facture", { numero: "FA-2026-0003" }));
+verifier("un doublon est repéré", doublons(d).length, 1);
+
+/* ============================== Les contrats ============================= */
+section("Contrats d'entretien");
+verifier("la visite suivante part du dernier passage",
+  prochaineVisite({ dernierPassage: "2025-09-18", debut: "2020-01-01", frequenceMois: 12 }), "2026-09-18");
+verifier("à défaut, de la date de début",
+  prochaineVisite({ dernierPassage: "", debut: "2026-03-04", frequenceMois: 12 }), "2027-03-04");
+verifier("un contrat semestriel rapporte deux fois par an",
+  caRecurrent({ contrats: [{ actif: true, montant: 90, frequenceMois: 6 }] }), 180);
+verifier("un contrat résilié ne rapporte rien",
+  caRecurrent({ contrats: [{ actif: false, montant: 90, frequenceMois: 12 }] }), 0);
+
+/* ============================== Le catalogue ============================= */
+section("Catalogue et taux horaire");
+verifier("marge en pourcentage", marge({ pu: 100, achat: 60 }).taux, 40);
+verifier("coefficient multiplicateur", marge({ pu: 100, achat: 50 }).coef, 2);
+verifier("sans prix d'achat, pas de marge", marge({ pu: 100, achat: 0 }), null);
+const th = tauxHoraireMinimum({ chargesAnnuelles: 20000, revenuSouhaite: 30000, semainesTravaillees: 45, heuresParSemaine: 40, partNonFacturable: 30 });
+verifier("heures facturables", th.heuresFacturables, 1260);
+verifier("taux horaire minimum", th.taux, arrondi(50000 / 1260));
+
+/* ============================== Le dossier =============================== */
+section("Dossier et compatibilité");
+const vieux = normaliser({ clients: [{ id: "c1", nom: "Test" }], documents: [{ id: "d1", kind: "devis" }] });
+verifier("un client importé sans équipements en reçoit un tableau", Array.isArray(vieux.clients[0].equipements), true);
+verifier("un document importé sans lignes en reçoit un tableau", Array.isArray(vieux.documents[0].lignes), true);
+verifier("les champs ajoutés depuis reprennent leur défaut", vieux.entreprise.assujettiTva, true);
+verifier("un dossier illisible ne casse rien", normaliser(null).clients.length, 0);
+
+section("Chiffres");
+const dossierCA = {
+  entreprise: { assujettiTva: true },
+  documents: [
+    documentVide("facture", { statut: "envoyee", date: "2026-08-05", lignes: [ligneVide({ quantite: 1, pu: 1000, tva: 20 })],
+      paiements: [{ id: "p", date: "2026-09-10", montant: 1200, moyen: "virement" }] }),
+    documentVide("facture", { statut: "brouillon", date: "2026-08-06", lignes: [ligneVide({ quantite: 1, pu: 9999, tva: 20 })] }),
+  ],
+};
+const ca = chiffreAffaires(dossierCA, "2026-08-01", "2026-08-31");
+verifier("les brouillons ne comptent pas", ca.facture, 1000);
+verifier("un encaissement compte à SA date", ca.encaisse, 0);
+verifier("et pas avant", chiffreAffaires(dossierCA, "2026-09-01", "2026-09-30").encaisse, 1200);
+
+/* =========================== Agenda : conflits =========================== */
+section("Chevauchements de rendez-vous");
+const types = [{ cle: "depannage", dureeMin: 60 }];
+const dossierRdv = {
+  rdv: [
+    { id: "r1", type: "depannage", debut: "2026-09-03T09:00", fin: "2026-09-03T10:30", statut: "prevu" },
+    { id: "r2", type: "depannage", debut: "2026-09-03T14:00", fin: "2026-09-03T15:00", statut: "annule" },
+  ],
+};
+verifier("un créneau qui déborde est signalé",
+  conflits(dossierRdv, { id: "r3", type: "depannage", debut: "2026-09-03T10:00", fin: "2026-09-03T11:00" }, types).length, 1);
+verifier("un créneau libre ne l'est pas",
+  conflits(dossierRdv, { id: "r3", type: "depannage", debut: "2026-09-03T11:00", fin: "2026-09-03T12:00" }, types).length, 0);
+verifier("un rendez-vous annulé ne bloque rien",
+  conflits(dossierRdv, { id: "r3", type: "depannage", debut: "2026-09-03T14:15", fin: "2026-09-03T14:45" }, types).length, 0);
+verifier("un rendez-vous ne se chevauche pas lui-même",
+  conflits(dossierRdv, { id: "r1", type: "depannage", debut: "2026-09-03T09:00", fin: "2026-09-03T10:30" }, types).length, 0);
+
+/* ========================== La coquille hors ligne ======================= */
+section("Cache hors ligne — la liste de sw.js");
+
+const racine = new URL("../", location.href);
+const swTexte = await (await fetch(new URL("sw.js", racine))).text();
+const bloc = swTexte.match(/const COQUE = \[([\s\S]*?)\];/);
+const coque = bloc ? [...bloc[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]) : [];
+verifier("la liste COQUE est lisible", coque.length > 0, true);
+
+const indexTexte = await (await fetch(new URL("index.html", racine))).text();
+const preloads = [...indexTexte.matchAll(/modulepreload"\s+href="([^"]+)"/g)].map((m) => m[1]);
+
+// Tous les modules preloades doivent etre dans la coque, sinon ils manqueront
+// hors ligne alors meme que l'en-tete les reclame au chargement.
+const manquants = preloads.filter((p) => !coque.includes(p));
+verifier(`les ${preloads.length} modules préchargés sont tous dans le cache`, manquants, []);
+
+// Et chaque entree de la coque doit exister : `addAll` est atomique.
+const absents = [];
+for (const chemin of coque) {
+  if (chemin === "./") continue;
+  const r = await fetch(new URL(chemin, racine), { method: "GET", cache: "no-store" });
+  if (!r.ok) absents.push(`${chemin} (${r.status})`);
+}
+verifier(`les ${coque.length} fichiers de la liste existent`, absents, []);
+
+// Le manifeste et les donnees, verifies separement : ils ne sont pas des modules.
+for (const fichier of ["manifest.webmanifest", "data/reference.json", "data/tva.json", "data/mentions.json", "data/checklist.json", "data/catalogue.json"]) {
+  const r = await fetch(new URL(fichier, racine), { cache: "no-store" });
+  verifier(`${fichier} se charge et se lit`, r.ok && (await r.json()) !== null, true);
+}
+
+/* ================================= Bilan ================================= */
+const bilan = document.getElementById("bilan");
+bilan.className = echecs ? "ko" : "ok";
+bilan.textContent = echecs
+  ? `${echecs} contrôle(s) en échec sur ${total}.`
+  : `${total} contrôles, tous verts.`;
+</script>
+</body>
+</html>

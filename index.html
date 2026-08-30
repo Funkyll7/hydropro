@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="clair">
+<head>
+<meta charset="utf-8">
+<!-- viewport-fit=cover n'est pas cosmetique : sans lui, les regles qui appellent
+     env(safe-area-inset-*) — barre laterale en tiroir, barre du bas, pied de
+     modale — recoivent TOUJOURS zero, sur tous les appareils. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clé de 12 — gestion plombier-chauffagiste</title>
+<meta name="description" content="Agenda, clients, devis, factures, contrats d'entretien et chiffres pour un artisan plombier-chauffagiste. Tout reste dans le navigateur : pas de compte, pas de serveur, pas d'abonnement.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f6fa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Clé de 12">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- Un fichier clients et des factures n'ont rien a faire dans un index de
+     moteur de recherche, et l'application n'a rien a y gagner. -->
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<!-- iPhone n'accepte pas le SVG en icone d'ecran d'accueil : sans PNG, il
+     capture une vignette de la page. `tools/icones.html` fabrique le fichier
+     (voir le README) ; deposez-le ici et decommentez la ligne suivante.
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+-->
+<link rel="apple-touch-icon" href="assets/img/favicon.svg">
+
+<!-- Les modules se decouvrent en cascade : le navigateur doit analyser main.js
+     pour savoir qu'il lui faut core/dom.js, puis dom.js pour la suite. Ces
+     lignes les demandent toutes d'un coup, des la lecture de l'en-tete.
+     A tenir a jour avec assets/js/ — une ligne de trop ne coute qu'une requete
+     inutile, une ligne manquante ne coute rien du tout.
+     `tools/verifier.mjs` compare cette liste au contenu du dossier. -->
+<link rel="modulepreload" href="assets/js/main.js">
+<link rel="modulepreload" href="assets/js/config.js">
+<link rel="modulepreload" href="assets/js/core/data.js">
+<link rel="modulepreload" href="assets/js/core/dom.js">
+<link rel="modulepreload" href="assets/js/core/format.js">
+<link rel="modulepreload" href="assets/js/core/prefs.js">
+<link rel="modulepreload" href="assets/js/core/store.js">
+<link rel="modulepreload" href="assets/js/domain/agenda.js">
+<link rel="modulepreload" href="assets/js/domain/catalogue.js">
+<link rel="modulepreload" href="assets/js/domain/clients.js">
+<link rel="modulepreload" href="assets/js/domain/contrats.js">
+<link rel="modulepreload" href="assets/js/domain/documents.js">
+<link rel="modulepreload" href="assets/js/domain/dossier.js">
+<link rel="modulepreload" href="assets/js/domain/mentions.js">
+<link rel="modulepreload" href="assets/js/domain/numerotation.js">
+<link rel="modulepreload" href="assets/js/domain/stats.js">
+<link rel="modulepreload" href="assets/js/ui/accueil.js">
+<link rel="modulepreload" href="assets/js/ui/agenda.js">
+<link rel="modulepreload" href="assets/js/ui/catalogue.js">
+<link rel="modulepreload" href="assets/js/ui/champs.js">
+<link rel="modulepreload" href="assets/js/ui/chiffres.js">
+<link rel="modulepreload" href="assets/js/ui/clients.js">
+<link rel="modulepreload" href="assets/js/ui/contrats.js">
+<link rel="modulepreload" href="assets/js/ui/documents.js">
+<link rel="modulepreload" href="assets/js/ui/icones.js">
+<link rel="modulepreload" href="assets/js/ui/impression.js">
+<link rel="modulepreload" href="assets/js/ui/interventions.js">
+<link rel="modulepreload" href="assets/js/ui/parts.js">
+<link rel="modulepreload" href="assets/js/ui/reglages.js">
+<link rel="modulepreload" href="assets/js/ui/sidebar.js">
+<link rel="modulepreload" href="assets/js/ui/theme.js">
+
+<link rel="stylesheet" href="assets/css/theme.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/print.css" media="print">
+</head>
+<body>
+
+<!-- Ecran de chargement, remplace des que les donnees de reference sont pretes. -->
+<div id="boot" class="boot">
+  <svg class="boot__logo" viewBox="0 0 64 64" aria-hidden="true">
+    <rect width="64" height="64" rx="14" fill="#0b57a4"/>
+    <path d="M32 11c0 0-13 15-13 25a13 13 0 0 0 26 0c0-10-13-25-13-25z" fill="#ffffff"/>
+    <path d="M32 25c0 5-5 6-5 11a5 5 0 0 0 10 0c0-4-3-5-5-11z" fill="#c9691f"/>
+  </svg>
+  <p class="boot__texte">Ouverture du dossier…</p>
+  <p id="boot-erreur" class="boot__erreur" hidden></p>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <a href="#principal" class="evitement">Aller au contenu</a>
+
+  <div id="voile" class="voile" aria-hidden="true"></div>
+
+  <aside id="sidebar" class="side" aria-label="Navigation et réglages">
+    <div id="sidebar-contenu" class="side__contenu"></div>
+  </aside>
+
+  <main id="principal" class="page" tabindex="-1"></main>
+
+  <!-- La navigation du bas, sur telephone uniquement. Le tiroir lateral reste,
+       mais il demande deux gestes — ouvrir, choisir — la ou celle-ci n'en
+       demande qu'un, et sous le pouce. -->
+  <nav id="barre-basse" class="basse no-print" aria-label="Rubriques"></nav>
+
+  <div id="bandeau" class="bandeau no-print" role="status" aria-live="polite" hidden></div>
+</div>
+
+<script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

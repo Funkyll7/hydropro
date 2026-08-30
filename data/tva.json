@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "verifieLe": "2026-08-30",
+  "avertissement": "Ces règles sont un AIDE-MÉMOIRE, pas un avis fiscal. Elles changent à chaque loi de finances — la dernière en date a sorti les chaudières à énergies fossiles des taux réduits. Vérifiez auprès de votre comptable ou sur impots.gouv.fr avant d'appliquer un taux réduit sur un chantier important : en cas de contrôle, c'est l'entreprise qui doit la différence, pas le client.",
+  "taux": [
+    {
+      "valeur": 20,
+      "nom": "Taux normal",
+      "resume": "Le taux par défaut. Tout ce qui n'entre pas expressément dans un taux réduit.",
+      "cas": [
+        "Logement neuf ou achevé depuis moins de 2 ans",
+        "Travaux d'agrandissement ou de surélévation",
+        "Chaudières fonctionnant aux énergies fossiles (gaz, fioul) — fourniture et pose",
+        "Locaux professionnels, commerces, bureaux",
+        "Vente de matériel sans pose"
+      ]
+    },
+    {
+      "valeur": 10,
+      "nom": "Taux intermédiaire",
+      "resume": "Travaux d'amélioration, de transformation, d'aménagement et d'entretien dans un logement d'habitation achevé depuis plus de 2 ans.",
+      "cas": [
+        "Dépannage et entretien de l'installation sanitaire",
+        "Entretien annuel de chaudière, contrat d'entretien",
+        "Remplacement d'un sanitaire, d'un radiateur, d'une robinetterie",
+        "Création ou reprise d'un réseau d'eau ou d'évacuation",
+        "Main d'œuvre et fournitures posées par l'entreprise dans le même chantier"
+      ],
+      "conditions": [
+        "Le logement doit être achevé depuis plus de 2 ans à la date de début des travaux",
+        "Il doit être à usage d'habitation (principale ou secondaire, propriétaire ou locataire)",
+        "Le client doit remettre une attestation ; depuis 2023, elle prend la forme d'une mention signée directement sur le devis ou la facture, le formulaire 1300-SD n'est plus exigé",
+        "Le matériel acheté par le client lui-même reste au taux auquel il l'a payé : le taux réduit ne s'applique qu'à ce que l'entreprise fournit ET pose"
+      ]
+    },
+    {
+      "valeur": 5.5,
+      "nom": "Taux réduit — rénovation énergétique",
+      "resume": "Travaux d'amélioration de la qualité énergétique du logement, et travaux induits qui leur sont indissociablement liés.",
+      "cas": [
+        "Pompe à chaleur air/eau ou eau/eau (hors PAC air/air)",
+        "Chauffe-eau thermodynamique, chauffe-eau solaire",
+        "Chaudière bois ou granulés performante",
+        "Calorifugeage, isolation du réseau, régulation et programmation",
+        "Travaux induits : reprise des raccordements, remise en état après pose"
+      ],
+      "conditions": [
+        "Logement d'habitation achevé depuis plus de 2 ans",
+        "Le matériel doit respecter les critères de performance de l'article 200 quater du CGI",
+        "Depuis mars 2025, les chaudières à gaz et à fioul sont EXCLUES des taux réduits et relèvent du taux normal",
+        "Attestation du client, comme pour le taux de 10 %"
+      ]
+    },
+    {
+      "valeur": 0,
+      "nom": "Non assujetti — franchise en base",
+      "resume": "Aucune TVA facturée, aucune TVA déduite sur les achats. Réservé aux entreprises sous les seuils de la franchise en base de l'article 293 B du CGI.",
+      "cas": [
+        "Micro-entreprise ou entreprise individuelle sous les seuils de chiffre d'affaires",
+        "La facture porte obligatoirement la mention « TVA non applicable, article 293 B du CGI »"
+      ],
+      "conditions": [
+        "Aucune TVA ne peut figurer sur la facture, ni être récupérée sur les achats",
+        "Le dépassement des seuils fait basculer au régime réel — surveillez votre chiffre d'affaires cumulé"
+      ]
+    }
+  ],
+  "attestation": {
+    "titre": "L'attestation de TVA réduite",
+    "texte": "Pour appliquer 10 % ou 5,5 %, l'entreprise doit détenir une attestation du client confirmant que le logement a plus de 2 ans et que les travaux entrent dans le champ du taux réduit. Depuis 2023, une mention signée sur le devis ou la facture remplace le formulaire 1300-SD. L'attestation doit être conservée jusqu'au 31 décembre de la cinquième année suivant les travaux.",
+    "mention": "Le client atteste que les travaux portent sur un local à usage d'habitation achevé depuis plus de deux ans et qu'ils n'entrent pas dans le champ des travaux exclus du taux réduit. Il conserve une copie de la présente attestation."
+  },
+  "sources": [
+    { "nom": "Taux de TVA applicables aux travaux dans les logements", "url": "https://www.economie.gouv.fr/particuliers/tva-travaux-logement" },
+    { "nom": "Service-public — TVA sur les travaux dans un logement", "url": "https://entreprendre.service-public.fr/vosdroits/F23570" },
+    { "nom": "Franchise en base de TVA", "url": "https://entreprendre.service-public.fr/vosdroits/F21746" }
+  ]
+}
