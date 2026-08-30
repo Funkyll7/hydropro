@@ -63,6 +63,7 @@ import { attribuerNumero, prochainNumero, trous, doublons } from "../assets/js/d
 import { prochaineVisite, caRecurrent } from "../assets/js/domain/contrats.js";
 import { chiffreAffaires } from "../assets/js/domain/stats.js";
 import { marge, tauxHoraireMinimum } from "../assets/js/domain/catalogue.js";
+import * as Photos from "../assets/js/core/photos.js";
 
 const sortie = document.getElementById("sortie");
 let total = 0;
@@ -368,6 +369,57 @@ verifier("et sont rendues à part", Object.keys(relu.photos), ["p1"]);
 const reluSansPhotos = importerDossier(JSON.stringify(dossierChantiers));
 verifier("un export sans photos rend null", reluSansPhotos.photos, null);
 verifier("le dossier reste lisible dans les deux cas", reluSansPhotos.dossier.clients.length, 1);
+
+/* ========================= Le magasin de photos ==========================
+   Le seul module qui touche à IndexedDB. Ces contrôles écrivent réellement
+   dans la base, puis font le ménage derrière eux.
+   ======================================================================== */
+section("Photos : le magasin");
+
+function canevas(couleur, largeur = 900, hauteur = 675) {
+  const c = document.createElement("canvas");
+  c.width = largeur; c.height = hauteur;
+  const x = c.getContext("2d");
+  x.fillStyle = couleur; x.fillRect(0, 0, largeur, hauteur);
+  return new Promise((r) => c.toBlob((b) => r(new File([b], "essai.jpg", { type: "image/jpeg" })), "image/jpeg", 0.92));
+}
+
+const brute = await canevas("#0b57a4");
+const preparee = await Photos.preparer(brute);
+verifier("la photo est réduite à 1600 px au plus", preparee.largeur <= 3000 && preparee.plein.size > 0, true);
+verifier("une vignette est produite", preparee.vignette.size > 0, true);
+verifier("la vignette est plus légère que l'image", preparee.vignette.size < preparee.plein.size, true);
+verifier("les dimensions d'origine sont conservées", [preparee.largeur, preparee.hauteur], [900, 675]);
+verifier("le poids annoncé est celui de l'image pleine", preparee.octets, preparee.plein.size);
+
+const cle = "verif-photo-1";
+verifier("le rangement confirme", await Photos.ranger(cle, preparee), true);
+const relue = await Photos.lire(cle);
+verifier("l'image se relit", relue?.plein instanceof Blob, true);
+verifier("la vignette aussi", relue?.vignette instanceof Blob, true);
+verifier("une adresse d'affichage est fabriquée", (await Photos.url(cle, "vignette"))?.startsWith("blob:"), true);
+verifier("la même adresse est réutilisée",
+  (await Photos.url(cle, "vignette")) === (await Photos.url(cle, "vignette")), true);
+verifier("l'identifiant apparaît dans le magasin", (await Photos.tousLesIds()).includes(cle), true);
+
+const paquet = await Photos.pourExport([cle]);
+verifier("l'export encode l'image en data URI", paquet[cle]?.startsWith("data:image/jpeg;base64,"), true);
+
+await Photos.supprimer(cle);
+// LE PIÈGE : sur une clé absente, `get` RÉUSSIT et rend `undefined`. Une
+// lecture mal écrite rendait l'objet IDBRequest, qui est truthy — `lire()`
+// affirmait donc qu'une photo effacée existait encore.
+verifier("une photo supprimée ne se lit plus", await Photos.lire(cle), null);
+verifier("une photo jamais rangée non plus", await Photos.lire("jamais-existe"), null);
+verifier("et n'a pas d'adresse d'affichage", await Photos.url("jamais-existe"), null);
+verifier("elle a quitté le magasin", (await Photos.tousLesIds()).includes(cle), false);
+
+const remises = await Photos.depuisExport(paquet);
+verifier("un export se restaure", remises, 1);
+verifier("et l'image est de nouveau lisible", (await Photos.lire(cle))?.plein instanceof Blob, true);
+verifier("avec une vignette régénérée", (await Photos.lire(cle))?.vignette instanceof Blob, true);
+await Photos.supprimer(cle);
+verifier("le ménage est fait", (await Photos.tousLesIds()).includes(cle), false);
 
 /* ========================== La coquille hors ligne ======================= */
 section("Cache hors ligne — la liste de sw.js");

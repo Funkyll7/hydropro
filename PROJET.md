@@ -99,7 +99,7 @@ assets/js/
     reglages.js             la fiche entreprise, la numérotation, les données
 
 tools/                      hors site — jamais chargés par l'application
-  verification.html         125 contrôles : calcul, dates, numérotation, et la
+  verification.html         145 contrôles : calcul, dates, numérotation, et la
                             liste du cache hors ligne
   icones.html               fabrique les PNG d'icône si on en veut
 ```

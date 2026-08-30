@@ -80,7 +80,15 @@ async function transaction(mode, action) {
     } catch {
       return resoudre(null);
     }
-    tx.oncomplete = () => resoudre(sortie && sortie.result !== undefined ? sortie.result : sortie);
+    // `instanceof IDBRequest`, et non un test sur `.result` : sur une cle
+    // absente, `get` REUSSIT et rend `undefined`. Le test precedent —
+    // « si .result est defini, le prendre, sinon prendre la requete » — rendait
+    // alors l'objet IDBRequest lui-meme, qui est truthy. `lire()` disait donc
+    // qu'une photo effacee existait toujours. Rien ne s'affichait de travers,
+    // parce que `url()` lisait ensuite `.plein` sur cette requete et tombait
+    // sur `undefined` — mais le contrat de `lire()` etait faux, et le premier
+    // appelant qui se serait fie a sa valeur de retour aurait eu tort.
+    tx.oncomplete = () => resoudre(sortie instanceof IDBRequest ? sortie.result : sortie);
     tx.onerror = () => resoudre(null);
     tx.onabort = () => resoudre(null);
   });
@@ -94,12 +102,13 @@ async function transaction(mode, action) {
  */
 export async function ranger(id, { plein, vignette }) {
   const ok = await transaction("readwrite", (m) => m.put({ plein, vignette }, id));
-  return ok !== null;
+  // `put` rend la cle employee : une valeur non nulle vaut confirmation.
+  return ok !== null && ok !== undefined;
 }
 
-/** L'entrée complète d'une photo, ou `null`. */
+/** L'entrée complète d'une photo, ou `null` si elle n'est pas dans le magasin. */
 export async function lire(id) {
-  return transaction("readonly", (m) => m.get(id));
+  return (await transaction("readonly", (m) => m.get(id))) || null;
 }
 
 export async function supprimer(id) {
