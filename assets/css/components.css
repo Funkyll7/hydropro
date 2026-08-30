@@ -32,6 +32,18 @@
 }
 
 .carte__sous-titre { font-size: var(--t-note); font-weight: 500; color: var(--texte-fantome); }
+
+/* Sur téléphone, l'en-tête d'une carte s'empile : le titre, puis ses actions.
+
+   Côte à côte, deux boutons larges — « Photographier », « Depuis l'appareil » —
+   ne laissaient qu'une quarantaine de pixels au titre, qui se retrouvait à un
+   mot par ligne. Et `flex-wrap` n'y aurait rien changé : le titre a
+   `min-width: 0`, donc il se comprime jusqu'à rien au lieu de pousser les
+   boutons à la ligne. Il faut passer en colonne. */
+@media (max-width: 560px) {
+  .carte__tete { flex-direction: column; align-items: stretch; gap: var(--sp-2); }
+  .carte__tete > .rang { justify-content: flex-start; }
+}
 .carte__corps { padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
 .carte__corps--serre { padding: 0; }
 
@@ -939,6 +951,133 @@
 .equip__corps { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .equip__nom { font-weight: 700; font-size: var(--t-petit); }
 .equip__meta { font-size: var(--t-micro); color: var(--texte-fantome); line-height: 1.5; }
+
+/* =============================== Photos ===================================
+   La grille de vignettes d'un chantier. Des carrés : une grille où chaque
+   image garde ses proportions donne un peigne, et l'œil ne balaie plus rien.
+   Le recadrage se fait par `object-fit: cover` — on perd les bords, on gagne
+   une planche-contact lisible, et la photo entière reste à un clic.
+   ========================================================================= */
+.photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: var(--sp-2);
+}
+
+.photo {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg-creux);
+  border: var(--trait) solid var(--bord);
+  cursor: pointer;
+  transition: transform var(--vite), border-color var(--vite);
+}
+
+.photo:hover { transform: translateY(-2px); border-color: var(--accent); }
+.photo__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* L'étiquette de phase est posée SUR la photo, en haut : c'est ce qui permet
+   de repérer un « avant » au milieu de vingt vignettes sans les lire. */
+.photo__phase {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: 700;
+  background: var(--bg-creux);
+  color: var(--texte-doux);
+}
+
+.photo__phase--avant { background: var(--avert); color: #ffffff; }
+.photo__phase--pendant { background: var(--accent); color: var(--accent-encre); }
+.photo__phase--apres { background: var(--ok); color: #ffffff; }
+
+/* La légende est lisible sur n'importe quelle photo grâce au dégradé : un
+   texte blanc posé sur une image claire disparaît, et sur une image sombre
+   c'est le texte noir qui disparaît. Le dégradé règle les deux cas. */
+.photo__legende {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 7px 5px;
+  background: linear-gradient(transparent, rgb(0 0 0 / .78));
+  color: #ffffff;
+  font-size: var(--t-micro);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Une étiquette sans image : dossier importé sans ses photos, ou stockage
+   vidé par le navigateur. On le dit, plutôt que d'afficher un carré gris. */
+.photo__manquante {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  padding: var(--sp-3);
+  text-align: center;
+  color: var(--texte-fantome);
+  font-size: var(--t-micro);
+  line-height: 1.4;
+}
+
+/* ---------------------------- La visionneuse ---------------------------- */
+.visionneuse { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+.visionneuse__image {
+  position: relative;
+  background: var(--bg-creux);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+}
+
+.visionneuse__image img {
+  display: block;
+  max-width: 100%;
+  /* Bornée à la hauteur de l'écran : sans cela, une photo en portrait pousse
+     la légende et les boutons hors de la fenêtre, sur un téléphone. */
+  max-height: min(56dvh, 520px);
+  object-fit: contain;
+}
+
+.visionneuse__fleches {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--sp-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+
+.visionneuse__fleches .btn {
+  background: var(--surface);
+  box-shadow: var(--ombre-2);
+}
+
+.visionneuse__compte {
+  padding: 4px 10px;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  box-shadow: var(--ombre-1);
+  font-size: var(--t-note);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
 
 /* ============================== Document ==================================
    L'aperçu d'un devis ou d'une facture. Il ressemble à la feuille A4 qui

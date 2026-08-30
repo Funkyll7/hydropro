@@ -27,6 +27,7 @@ export const ONGLETS = [
   { cle: "accueil", nom: "Aujourd'hui", court: "Auj.", ico: "accueil" },
   { cle: "agenda", nom: "Agenda", court: "Agenda", ico: "agenda" },
   { cle: "clients", nom: "Clients", court: "Clients", ico: "clients" },
+  { cle: "chantiers", nom: "Chantiers", court: "Chant.", ico: "chantiers" },
   { cle: "devis", nom: "Devis", court: "Devis", ico: "devis" },
   { cle: "factures", nom: "Factures", court: "Factures", ico: "factures" },
   { cle: "interventions", nom: "Interventions", ico: "interventions" },
@@ -68,6 +69,11 @@ export function compteurs(dossier) {
     factures: { n: facturesRetard, alerte: facturesRetard > 0 },
     contrats: { n: dues.length, alerte: dues.length > 0 },
     clients: { n: dossier.clients.filter((c) => !c.archive).length },
+    chantiers: {
+      n: dossier.clients
+        .filter((c) => !c.archive)
+        .reduce((s, c) => s + (c.chantiers || []).filter((x) => x.statut === "en-cours").length, 0),
+    },
   };
 }
 

@@ -13,8 +13,13 @@
  * FORME DU DOSSIER
  * ----------------
  *   entreprise   la fiche de l'artisan : identite, assurances, taux, mentions
- *   clients[]    avec leurs equipements imbriques (une chaudiere appartient a
- *                un client, elle n'existe pas sans lui)
+ *   clients[]    avec leurs equipements ET leurs chantiers imbriques : une
+ *                chaudiere comme un chantier appartiennent a un client, et
+ *                n'existent pas sans lui. Un client peut avoir plusieurs
+ *                chantiers — c'est le cas normal d'un syndic ou d'un bailleur.
+ *                Les photos d'un chantier ne sont ici que sous forme
+ *                d'ETIQUETTES : les images vivent dans IndexedDB, voir
+ *                core/photos.js.
  *   rdv[]        les rendez-vous de l'agenda
  *   interventions[]  les bons d'intervention, relies a un rendez-vous
  *   documents[]  devis, factures et avoirs, dans une seule liste
@@ -31,6 +36,7 @@
 import { CONFIG } from "../config.js";
 import { id } from "../core/store.js";
 import { aujourdhui, isoInstant } from "../core/format.js";
+import { pourExport } from "../core/photos.js";
 
 /** La version du schema. Toute migration part de la version lue dans le fichier. */
 export const VERSION = 1;
@@ -141,8 +147,62 @@ export function clientVide(patch = {}) {
     notes: "",
     tags: [],
     equipements: [],
+    chantiers: [],
     archive: false,
     creeLe: aujourdhui(),
+    ...patch,
+  };
+}
+
+/**
+ * Un chantier : un LIEU de travail, pas un client.
+ *
+ * La distinction n'est pas theorique. Un syndic a trente adresses, un
+ * proprietaire a sa maison et l'appartement qu'il loue, un client fait refaire
+ * sa salle de bain deux ans apres sa chaufferie. Tant que l'adresse n'etait
+ * qu'un texte libre recopie sur chaque devis, l'historique se dispersait : on
+ * ne pouvait pas repondre a « qu'est-ce qu'on a deja fait ICI ? ».
+ *
+ * Le chantier appartient au client, comme l'equipement : il n'existe pas sans
+ * lui, et il est donc imbrique plutot que range dans une liste a part.
+ *
+ * `photos` ne contient QUE des etiquettes. Les images elles-memes vivent dans
+ * IndexedDB — voir core/photos.js pour la raison, qui tient en une phrase :
+ * une photo dans le localStorage rendrait le dossier inecrivable.
+ */
+export function chantierVide(patch = {}) {
+  return {
+    id: id("cha"),
+    nom: "",
+    adresse: "",
+    complement: "",
+    cp: "",
+    ville: "",
+    acces: "",
+    notes: "",
+    debut: "",
+    fin: "",
+    statut: "en-cours",
+    photos: [],
+    creeLe: aujourdhui(),
+    ...patch,
+  };
+}
+
+/**
+ * L'etiquette d'une photo. L'image, elle, est dans IndexedDB sous ce meme `id`.
+ *
+ * `phase` vaut « avant », « pendant » ou « apres » : c'est ce qui transforme un
+ * tas d'images en preuve utilisable devant une assurance ou un client qui
+ * conteste.
+ */
+export function photoVide(patch = {}) {
+  return {
+    id: id("pho"),
+    legende: "",
+    phase: "pendant",
+    prise: isoInstant(),
+    octets: 0,
     ...patch,
   };
 }
@@ -169,6 +229,7 @@ export function rdvVide(patch = {}) {
   return {
     id: id("rdv"),
     clientId: "",
+    chantierId: "",
     type: "depannage",
     titre: "",
     debut: "",
@@ -190,6 +251,7 @@ export function interventionVide(patch = {}) {
     numero: "",
     rdvId: "",
     clientId: "",
+    chantierId: "",
     equipementId: "",
     date: aujourdhui(),
     arrivee: "",
@@ -227,6 +289,7 @@ export function documentVide(kind, patch = {}) {
     kind,
     numero: "",
     clientId: "",
+    chantierId: "",
     date: aujourdhui(),
     /** Devis : date de fin de validite. Facture : date d'echeance. */
     echeance: "",
@@ -388,6 +451,14 @@ export function normaliser(brut) {
     ...c,
     equipements: Array.isArray(c.equipements) ? c.equipements : [],
     tags: Array.isArray(c.tags) ? c.tags : [],
+    // `chantiers` est arrive apres les premiers dossiers : un client importe
+    // d'un export anterieur n'en a pas, et la fiche client leverait des son
+    // ouverture si on ne lui en donnait pas un tableau vide.
+    chantiers: (Array.isArray(c.chantiers) ? c.chantiers : []).map((ch) => ({
+      ...chantierVide(),
+      ...ch,
+      photos: Array.isArray(ch.photos) ? ch.photos : [],
+    })),
   }));
 
   d.documents = d.documents.map((doc) => ({
@@ -417,9 +488,28 @@ export function normaliser(brut) {
    si cette application n'existe plus.
    ======================================================================== */
 
-/** Le contenu du fichier de sauvegarde, pret a etre telecharge. */
+/**
+ * Le contenu du fichier de sauvegarde, sans les photos.
+ *
+ * C'est l'export courant : quelques dizaines de kilo-octets, qu'on peut faire
+ * toutes les semaines sans y penser. Il contient tout ce qui se facture.
+ */
 export function exporter(dossier) {
   return JSON.stringify({ ...dossier, exporteLe: isoInstant() }, null, 2);
+}
+
+/**
+ * Le meme, photos comprises.
+ *
+ * Les images sont relues dans IndexedDB et encodees en base64 — ce qui les
+ * alourdit d'un tiers. Un chantier de vingt photos donne un fichier d'environ
+ * 7 Mo. C'est lourd, et c'est pour cela que ce n'est pas l'export par defaut :
+ * une sauvegarde qu'on renonce a faire parce qu'elle prend trois minutes ne
+ * protege personne.
+ */
+export async function exporterComplet(dossier) {
+  const photos = await pourExport(toutesLesPhotos(dossier));
+  return JSON.stringify({ ...dossier, photos, exporteLe: isoInstant() }, null, 2);
 }
 
 /** Un nom de fichier date, qui se trie tout seul dans un dossier. */
@@ -451,7 +541,13 @@ export function importer(texte) {
   if (!brut || typeof brut !== "object" || !("clients" in brut || "documents" in brut)) {
     throw new Error("Ce fichier ne contient pas de dossier Hydropro.");
   }
-  return normaliser(brut);
+
+  // Les photos voyagent a cote du dossier, jamais dedans : elles repartent
+  // dans IndexedDB, et le dossier reste leger dans le localStorage.
+  const photos = brut.photos && typeof brut.photos === "object" ? brut.photos : null;
+  delete brut.photos;
+
+  return { dossier: normaliser(brut), photos };
 }
 
 /* ===========================================================================
@@ -470,6 +566,36 @@ export function equipementParId(dossier, equipementId) {
     if (eq) return { ...eq, client };
   }
   return null;
+}
+
+/**
+ * Le chantier et SON client, ou qu'il soit dans le dossier.
+ *
+ * Rend l'objet reel — pas une copie — pour qu'on puisse le modifier dans un
+ * `ctx.maj()`, et le client a cote, parce qu'on n'affiche jamais un chantier
+ * sans dire chez qui il est.
+ */
+export function chantierParId(dossier, chantierId) {
+  if (!chantierId) return null;
+  for (const client of dossier.clients) {
+    const chantier = (client.chantiers || []).find((c) => c.id === chantierId);
+    if (chantier) return { chantier, client };
+  }
+  return null;
+}
+
+/** Tous les chantiers du dossier, avec leur client. */
+export function tousLesChantiers(dossier) {
+  return dossier.clients.flatMap((client) =>
+    (client.chantiers || []).map((chantier) => ({ chantier, client }))
+  );
+}
+
+/** Les identifiants de toutes les photos citees par le dossier. */
+export function toutesLesPhotos(dossier) {
+  return tousLesChantiers(dossier).flatMap(({ chantier }) =>
+    (chantier.photos || []).map((p) => p.id)
+  );
 }
 
 /**

@@ -63,12 +63,14 @@ assets/js/
     format.js               nombres, dates et heures en français
     prefs.js                les réglages de CE navigateur (thème, taille)
     data.js                 chargement des JSON, avec cache
+    photos.js               le magasin d'images, dans IndexedDB (voir § 9)
 
   domain/                   le calcul. Aucun accès au DOM, testable seul
     dossier.js              le schéma du dossier, sa persistance, import/export
     numerotation.js         DEV-2026-0001, FA-2026-0001 — séquence continue
     documents.js            le calcul d'un devis, d'une facture, d'un avoir
     clients.js              recherche, adresses, bilan, doublons
+    chantiers.js            les lieux de travail, leurs photos, leurs liens
     agenda.js               jours fériés, grille du mois, conflits, créneaux
     contrats.js             contrats d'entretien et échéances de visite
     catalogue.js            prestations, fournitures, marges, hausse de prix
@@ -87,6 +89,8 @@ assets/js/
     accueil.js              le tableau de bord du matin
     agenda.js               mois, semaine, jour, et la fiche d'un rendez-vous
     clients.js              le fichier clients et la fiche d'un client
+    chantiers.js            la liste des chantiers et la fiche de l'un d'eux
+    photos.js               prise de vue, galerie, visionneuse
     documents.js            devis et factures : liste, éditeur, aperçu
     interventions.js        les bons d'intervention
     contrats.js             les contrats d'entretien
@@ -95,7 +99,7 @@ assets/js/
     reglages.js             la fiche entreprise, la numérotation, les données
 
 tools/                      hors site — jamais chargés par l'application
-  verification.html         91 contrôles : calcul, dates, numérotation, et la
+  verification.html         125 contrôles : calcul, dates, numérotation, et la
                             liste du cache hors ligne
   icones.html               fabrique les PNG d'icône si on en veut
 ```
@@ -206,14 +210,54 @@ la colonne entière hors de l'écran, et **toute** la page se mettait à défile
 horizontalement. Le contrôle qui l'a trouvé compare `documentElement.scrollWidth`
 à `innerWidth` sur chaque écran, à 320 px puis à 375 px.
 
-### 9. Aucune image binaire dans le dépôt
+### 9. Les photos ne sont PAS dans le localStorage
+
+C'est la décision qui commande tout `core/photos.js`, et elle vaut d'être
+comprise avant d'y toucher.
+
+Le dossier entier est écrit **d'un seul bloc** par `enregistrer()`, dans un
+`localStorage` dont le quota tourne autour de 5 Mo. Une photo de téléphone pèse
+3 Mo, et le localStorage n'accepte que du texte : encodée en base64, elle en
+pèse 4. Deux photos, et l'écriture échoue.
+
+Or ce n'est pas la photo qu'on perdrait : **c'est le dossier**. L'écriture est
+atomique — au-dessus du quota, elle échoue en entier, et la facture qu'on venait
+de saisir ne s'enregistre pas. Mettre des photos dans le localStorage, c'est
+troquer une comptabilité contre un album.
+
+Les images vivent donc dans **IndexedDB** : magasin séparé, quota en centaines
+de mégaoctets, et des `Blob` binaires — pas d'inflation de 33 %. Le dossier ne
+garde que les **étiquettes** : identifiant, légende, phase, date, poids.
+Quelques dizaines d'octets par photo.
+
+Trois conséquences, toutes assumées :
+
+- **l'export JSON habituel ne contient pas les images.** L'écran d'export
+  propose les deux formats dès qu'il y a des photos, et dit lequel protège
+  quoi. Un export léger qu'on fait chaque semaine vaut mieux qu'un export
+  complet qu'on renonce à lancer ;
+- **une étiquette peut survivre à son image** — dossier importé sans les
+  photos, stockage vidé par le navigateur. La galerie l'affiche alors comme
+  « image absente de cet appareil », au lieu d'un carré gris ;
+- **on demande la persistance** (`navigator.storage.persist()`) à la première
+  photo, pas au démarrage : sans elle, le navigateur peut supprimer les images
+  tout seul pour faire de la place. Une permission demandée avant d'avoir rien
+  montré se refuse par réflexe.
+
+La compression est faite au passage : 1600 px et JPEG, soit environ 250 Ko au
+lieu de 3 Mo. Le passage par un canvas **supprime aussi les données EXIF, donc
+le GPS** — une photo prise chez un client n'a pas à se promener avec l'adresse
+de son domicile. Et `imageOrientation: "from-image"` évite le défaut classique
+des galeries faites à la main : les photos en portrait couchées sur le côté.
+
+### 10. Aucune image binaire dans le dépôt
 
 La marque est un SVG de quinze lignes, qui sert d'icône partout où le navigateur
 l'accepte. Deux endroits ne l'acceptent pas — l'écran d'accueil d'un iPhone et
 l'écran de lancement Android — et `tools/icones.html` fabrique les PNG à la
 demande. Tant qu'ils ne sont pas déposés, l'application s'installe quand même.
 
-### 10. Renommer l'application ne doit effacer le dossier de personne
+### 11. Renommer l'application ne doit effacer le dossier de personne
 
 L'application s'est d'abord appelée « Clé de 12 », et ses clés de `localStorage`
 portaient ce nom. Les renommer en `hydropro.*` sans précaution n'aurait rien
@@ -230,7 +274,7 @@ La même prudence vaut pour `VERSION` dans `sw.js` : la changer invalide les
 anciens caches, ce qui est ici **voulu** — sans cela, un téléphone qui avait
 installé l'application aurait continué à servir l'ancienne coquille.
 
-### 11. Les informations réglementaires sont datées et sourcées
+### 12. Les informations réglementaires sont datées et sourcées
 
 `data/tva.json` et `data/checklist.json` portent un champ `verifieLe` et des
 liens vers les textes officiels. Ce sont des **aide-mémoire**, affichés comme

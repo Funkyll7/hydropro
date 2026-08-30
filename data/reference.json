@@ -44,6 +44,18 @@
     { "cle": "autre", "nom": "Autre" }
   ],
 
+  "statutsChantier": [
+    { "cle": "prevu", "nom": "Prévu", "couleur": "neutre", "aide": "Accepté mais pas encore commencé." },
+    { "cle": "en-cours", "nom": "En cours", "couleur": "info", "aide": "Le seul état qui réclame quelque chose : c'est là qu'on va cette semaine." },
+    { "cle": "termine", "nom": "Terminé", "couleur": "ok", "aide": "Travaux réceptionnés. Les photos restent, elles servent en cas de litige." }
+  ],
+
+  "phasesPhoto": [
+    { "cle": "avant", "nom": "Avant", "couleur": "avert", "aide": "L'état trouvé en arrivant. C'est la photo qui protège d'un « c'était déjà comme ça »." },
+    { "cle": "pendant", "nom": "Pendant", "couleur": "info", "aide": "Ce qu'on ne reverra plus une fois refermé : passages de tuyaux, saignées, raccords encastrés." },
+    { "cle": "apres", "nom": "Après", "couleur": "ok", "aide": "Le travail fini. À montrer au client, et à garder pour la garantie." }
+  ],
+
   "typesClient": [
     { "cle": "particulier", "nom": "Particulier" },
     { "cle": "pro", "nom": "Professionnel" },

@@ -18,6 +18,7 @@ import { chargerCatalogueInitial, chargerReferences } from "./core/data.js";
 import { poserReglage, valeur } from "./core/prefs.js";
 import { isoInstant } from "./core/format.js";
 import * as Dossier from "./domain/dossier.js";
+import * as Photos from "./core/photos.js";
 import { installerCatalogue } from "./domain/catalogue.js";
 import {
   appliquerTaille,
@@ -33,6 +34,7 @@ import { bouton, boutonIcone } from "./ui/champs.js";
 import * as VueAccueil from "./ui/accueil.js";
 import * as VueAgenda from "./ui/agenda.js";
 import * as VueClients from "./ui/clients.js";
+import * as VueChantiers from "./ui/chantiers.js";
 import * as VueDocuments from "./ui/documents.js";
 import * as VueInterventions from "./ui/interventions.js";
 import * as VueContrats from "./ui/contrats.js";
@@ -44,6 +46,7 @@ const VUES = {
   accueil: VueAccueil,
   agenda: VueAgenda,
   clients: VueClients,
+  chantiers: VueChantiers,
   devis: VueDocuments,
   factures: VueDocuments,
   interventions: VueInterventions,
@@ -387,11 +390,57 @@ function confirmer({ titre, texte, valider = "Supprimer", danger = true }) {
 
 /* =========================== Export et import ============================ */
 
-function exporter() {
-  const contenu = Dossier.exporter(etat.dossier);
+/**
+ * Exporte le dossier.
+ *
+ * Deux formats, et le choix n'est propose que s'il y a des photos : sans
+ * photos, il n'y a rien a choisir, et une question posee pour rien est une
+ * question a laquelle on repond au hasard.
+ */
+async function exporter() {
+  const photos = Dossier.toutesLesPhotos(etat.dossier);
+  if (!photos.length) return telecharger(Dossier.exporter(etat.dossier));
+
+  const { fermer } = modale({
+    titre: "Exporter le dossier",
+    corps: el(
+      "div",
+      { style: { display: "flex", flexDirection: "column", gap: "12px" } },
+      el(
+        "p",
+        `Ce dossier contient ${photos.length} photo${photos.length > 1 ? "s" : ""} de chantier. Les images ne sont pas dans le fichier de sauvegarde habituel : elles sont rangées à part, dans la mémoire du navigateur.`
+      ),
+      el(
+        "p.champ__aide",
+        "La sauvegarde légère suffit pour tout ce qui se facture — clients, devis, factures, contrats. La sauvegarde complète est la seule qui protège aussi les photos, mais elle pèse plusieurs mégaoctets."
+      )
+    ),
+    actions: (close) => [
+      bouton("Annuler", { onclick: close }),
+      bouton("Sans les photos", {
+        onclick: () => {
+          close();
+          telecharger(Dossier.exporter(etat.dossier));
+        },
+      }),
+      bouton("Avec les photos", {
+        variante: "plein",
+        onclick: async () => {
+          close();
+          toast("Préparation des photos…", { duree: 4000 });
+          telecharger(await Dossier.exporterComplet(etat.dossier), "-complet");
+        },
+      }),
+    ],
+  });
+  void fermer;
+}
+
+function telecharger(contenu, suffixe = "") {
   const blob = new Blob([contenu], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-  const a = el("a", { href: url, download: Dossier.nomExport(etat.dossier) });
+  const nom = Dossier.nomExport(etat.dossier).replace(/\.json$/, `${suffixe}.json`);
+  const a = el("a", { href: url, download: nom });
   document.body.append(a);
   a.click();
   a.remove();
@@ -413,25 +462,44 @@ function importerFichier() {
     if (!fichier) return;
 
     let importe;
+    let photos;
     try {
-      importe = Dossier.importer(await fichier.text());
+      ({ dossier: importe, photos } = Dossier.importer(await fichier.text()));
     } catch (e) {
       toast(e.message, { erreur: true, duree: 8000 });
       return;
     }
 
+    const nbPhotos = photos ? Object.keys(photos).length : 0;
     const ok = await confirmer({
       titre: "Remplacer le dossier actuel ?",
-      texte: `Le fichier contient ${importe.clients.length} client(s), ${importe.documents.length} document(s) et ${importe.rdv.length} rendez-vous. Le dossier actuellement ouvert sera remplacé — exportez-le d'abord si vous n'êtes pas sûr.`,
+      texte: `Le fichier contient ${importe.clients.length} client(s), ${importe.documents.length} document(s), ${importe.rdv.length} rendez-vous${
+        nbPhotos ? ` et ${nbPhotos} photo(s)` : ""
+      }. Le dossier actuellement ouvert sera remplacé — exportez-le d'abord si vous n'êtes pas sûr.`,
       valider: "Remplacer",
     });
     if (!ok) return;
 
     etat.dossier = importe;
     enregistrer();
+
+    // Les photos repartent dans IndexedDB, pas dans le dossier. On le fait
+    // APRES avoir enregistre le dossier : si la remise des images echoue faute
+    // de place, on aura au moins recupere tout ce qui se facture.
+    if (nbPhotos) {
+      toast(`Restauration de ${nbPhotos} photo(s)…`, { duree: 6000 });
+      const remises = await Photos.depuisExport(photos);
+      if (remises < nbPhotos) {
+        toast(`${nbPhotos - remises} photo(s) n'ont pas pu être restaurées, faute de place.`, {
+          erreur: true,
+          duree: 9000,
+        });
+      }
+    }
+
     aller("accueil");
     rendre();
-    toast("Dossier importé.");
+    toast(nbPhotos ? "Dossier et photos importés." : "Dossier importé.");
   });
 
   input.click();

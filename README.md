@@ -30,6 +30,26 @@ surtout **les appareils** : marque, modèle, numéro de série, date de pose,
 dernier entretien. Plus l'historique complet : rendez-vous, interventions,
 devis, factures, ce qui a été payé et avec quel retard.
 
+**Chantiers et photos** — un client n'est pas une adresse : un syndic a trente
+immeubles, un bailleur autant de logements, un particulier finit par avoir la
+salle de bain *et* la chaufferie. Chaque client porte donc autant de chantiers
+qu'il en a, et c'est le chantier qui rassemble les photos, les devis, les
+factures, les rendez-vous et le code de la porte.
+
+Les photos se prennent **avec l'appareil photo du téléphone**, depuis la fiche
+du chantier, et se rangent en trois temps :
+
+- **avant** — l'état trouvé en arrivant. C'est la photo qui protège d'un
+  « c'était déjà comme ça » trois semaines plus tard ;
+- **pendant** — ce que plus personne ne reverra une fois le mur refermé :
+  passages de tuyaux, saignées, raccords encastrés ;
+- **après** — le travail fini, à montrer au client et à garder pour la garantie.
+
+Chaque photo prend une légende. Elles sont réduites et recompressées à
+l'enregistrement (environ 250 Ko au lieu de 3 Mo), ce qui **efface au passage
+les données GPS** : une photo prise chez un client ne se promène pas avec
+l'adresse de son domicile.
+
 **Devis et factures** — éditeur de lignes avec catalogue, TVA multi-taux, remise
 par ligne et remise globale, acompte, sections et commentaires. Mentions légales
 remplies automatiquement depuis la fiche entreprise. Aperçu conforme au papier,
@@ -89,6 +109,25 @@ gauche — et rangez le fichier ailleurs : clé USB, disque externe, espace de
 stockage en ligne. Passé quatorze jours sans export, l'application vous le
 rappelle. Le fichier obtenu est du JSON lisible : vous pourrez le relire dans
 dix ans, même sans cette application.
+
+### Les photos sont rangées à part
+
+Elles ne tiendraient pas dans la même mémoire que le reste : une seule photo
+suffirait à la remplir, et c'est alors **le dossier entier** qui ne s'écrirait
+plus — la facture saisie juste après serait perdue. Les images vivent donc dans
+un second magasin du navigateur, plus grand.
+
+Conséquence directe : dès qu'il y a des photos, l'export vous demande lequel des
+deux vous voulez.
+
+- **Sans les photos** — quelques dizaines de kilo-octets. Tout ce qui se
+  facture. C'est celui à faire chaque semaine.
+- **Avec les photos** — plusieurs mégaoctets. Le seul qui les protège aussi.
+  À faire de temps en temps, quand un chantier important est fini.
+
+Si vous restaurez un export léger sur un autre appareil, les photos y
+apparaîtront comme « image absente de cet appareil » : leurs légendes sont là,
+les images non.
 
 ---
 
@@ -220,7 +259,7 @@ casser la mise en page.
 
 ## Vérifier après une modification
 
-Ouvrir <http://localhost:4175/tools/verification.html>. La page exécute une
+Ouvrir <http://localhost:4175/tools/verification.html>. La page exécute plus d'une
 centaine de contrôles : lecture des nombres à la française, dates et jours
 fériés, calcul complet d'un devis multi-taux, numérotation, chevauchements de
 rendez-vous, compatibilité des anciens exports — et surtout la **liste du cache

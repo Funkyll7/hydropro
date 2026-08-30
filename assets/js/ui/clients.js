@@ -31,6 +31,8 @@ import { actionsClient, ligneDocument, ligneRdv, retour } from "./parts.js";
 import { ouvrirRdv } from "./agenda.js";
 import { creerDocument } from "./documents.js";
 import { ouvrirContrat } from "./contrats.js";
+import { creerChantier } from "./chantiers.js";
+import * as Chantiers from "../domain/chantiers.js";
 import {
   dateCourte,
   euros,
@@ -244,6 +246,7 @@ function fiche(ctx, client) {
     ),
 
     coordonnees(ctx, client),
+    chantiers(ctx, client),
     equipements(ctx, client),
     contratsDuClient(ctx, client),
     historique(ctx, client, prochain),
@@ -315,6 +318,57 @@ function coordonnees(ctx, client) {
         oninput: maj("notes"),
       }),
     ],
+  });
+}
+
+/* ------------------------------ Chantiers -------------------------------
+   Un client peut avoir plusieurs lieux de travail : un syndic en a trente, un
+   bailleur en a autant que de logements, un particulier finit par en avoir
+   deux — la salle de bain, puis la chaufferie deux ans plus tard. C'est le
+   chantier qui porte les photos, parce que c'est le LIEU qu'on photographie,
+   pas la personne.
+   ======================================================================== */
+
+function chantiers(ctx, client) {
+  const liste = Chantiers.trier((client.chantiers || []).map((chantier) => ({ chantier, client })));
+  const statuts = ctx.ref.reference.statutsChantier;
+
+  return carteListe({
+    titre: "Chantiers",
+    sousTitre: liste.length
+      ? `${pluriel(liste.length, "lieu de travail", "lieux de travail")} — chacun avec ses photos et ses documents`
+      : "Aucun chantier : les photos et l'historique se rattachent à un lieu",
+    actions: [
+      bouton("Nouveau chantier", { ico: "plus", petit: true, onclick: () => creerChantier(ctx, client) }),
+    ],
+    contenu: liste.length
+      ? el(
+          "div",
+          liste.map(({ chantier }) => {
+            const e = Chantiers.etat(chantier, statuts);
+            const nbPhotos = (chantier.photos || []).length;
+            return el(
+              `button.ligne.ligne--cliquable.ligne--marque.ligne--marque-${e.couleur}`,
+              { type: "button", onclick: () => ctx.aller("chantiers", chantier.id) },
+              el("div.ligne__icone", icone("chantiers", 18)),
+              el(
+                "div.ligne__corps",
+                el("div.ligne__titre", Chantiers.nomChantier(chantier)),
+                el(
+                  "div.ligne__meta",
+                  el("span", Chantiers.adresseCourte(chantier) || "adresse du client"),
+                  nbPhotos ? el("span", pluriel(nbPhotos, "photo")) : el("span", "aucune photo")
+                )
+              ),
+              el("div.ligne__droite", el(`span.etat.etat--${e.couleur}`, e.nom))
+            );
+          })
+        )
+      : el(
+          "div.champ__aide",
+          { style: { padding: "12px 16px" } },
+          "Créez-en un dès la première visite : il portera les photos avant travaux, les devis et l'accès."
+        ),
   });
 }
 

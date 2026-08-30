@@ -35,7 +35,30 @@
 import { arrondi, ajouteMois, aujourdhui, enLettres, isoJour, joursEntre, nombre, normalise } from "../assets/js/core/format.js";
 import { feries, grilleMois, paques, conflits } from "../assets/js/domain/agenda.js";
 import { calculer, statutEffectif, penalites } from "../assets/js/domain/documents.js";
-import { documentVide, ligneVide, dossierVide, normaliser } from "../assets/js/domain/dossier.js";
+import {
+  documentVide,
+  ligneVide,
+  dossierVide,
+  normaliser,
+  chantierVide,
+  chantierParId,
+  tousLesChantiers,
+  toutesLesPhotos,
+  importer as importerDossier,
+} from "../assets/js/domain/dossier.js";
+import {
+  nomChantier,
+  adressePourDocument,
+  documentsDuChantier,
+  rdvDuChantier,
+  bilan as bilanCha,
+  trier as trierChantiers,
+  correspond as correspondChantier,
+  photosParPhase,
+  poidsPhotos,
+  avantApres,
+  raisonsDeGarder as raisonsChantier,
+} from "../assets/js/domain/chantiers.js";
 import { attribuerNumero, prochainNumero, trous, doublons } from "../assets/js/domain/numerotation.js";
 import { prochaineVisite, caRecurrent } from "../assets/js/domain/contrats.js";
 import { chiffreAffaires } from "../assets/js/domain/stats.js";
@@ -247,6 +270,104 @@ verifier("un rendez-vous annulé ne bloque rien",
   conflits(dossierRdv, { id: "r3", type: "depannage", debut: "2026-09-03T14:15", fin: "2026-09-03T14:45" }, types).length, 0);
 verifier("un rendez-vous ne se chevauche pas lui-même",
   conflits(dossierRdv, { id: "r1", type: "depannage", debut: "2026-09-03T09:00", fin: "2026-09-03T10:30" }, types).length, 0);
+
+/* ============================== Les chantiers ============================ */
+section("Chantiers");
+const clientChantiers = {
+  id: "cli-1", nom: "Durand", prenom: "Pierre", societe: "", adresse: "8 allée des Peupliers",
+  complement: "", cp: "69100", ville: "Villeurbanne", archive: false, equipements: [],
+  chantiers: [
+    { ...chantierVide(), id: "cha-1", nom: "Chaufferie", adresse: "40 rue Garibaldi", cp: "69003", ville: "Lyon", statut: "en-cours",
+      photos: [
+        { id: "p1", phase: "avant", prise: "2026-08-01T09:00", octets: 200000, legende: "compteur" },
+        { id: "p2", phase: "apres", prise: "2026-08-03T17:00", octets: 300000, legende: "" },
+        { id: "p3", phase: "avant", prise: "2026-08-01T08:00", octets: 100000, legende: "" },
+      ] },
+    { ...chantierVide(), id: "cha-2", nom: "Salle de bain", statut: "termine", photos: [] },
+    { ...chantierVide(), id: "cha-3", nom: "Cuisine", statut: "prevu", photos: [] },
+  ],
+};
+const dossierChantiers = {
+  ...dossierVide(),
+  clients: [clientChantiers],
+  documents: [
+    documentVide("facture", { id: "f1", chantierId: "cha-1", statut: "envoyee", date: "2026-08-05",
+      lignes: [ligneVide({ quantite: 1, pu: 1000, tva: 20 })],
+      paiements: [{ id: "x", date: "2026-08-20", montant: 600, moyen: "virement" }] }),
+    documentVide("devis", { id: "d1", chantierId: "cha-1", statut: "envoye", date: "2026-08-01", echeance: "2026-12-01",
+      lignes: [ligneVide({ quantite: 1, pu: 500, tva: 10 })] }),
+    documentVide("facture", { id: "f2", chantierId: "cha-2", statut: "envoyee", date: "2026-08-05",
+      lignes: [ligneVide({ quantite: 1, pu: 999, tva: 20 })] }),
+  ],
+  rdv: [{ id: "r1", chantierId: "cha-1", clientId: "cli-1", debut: "2026-08-02T09:00", statut: "fait", type: "installation" }],
+};
+
+verifier("un client peut porter plusieurs chantiers", clientChantiers.chantiers.length, 3);
+verifier("le chantier se retrouve par son identifiant",
+  chantierParId(dossierChantiers, "cha-1")?.chantier.nom, "Chaufferie");
+verifier("et il ramene son client avec lui",
+  chantierParId(dossierChantiers, "cha-1")?.client.id, "cli-1");
+verifier("un identifiant inconnu ne rend rien", chantierParId(dossierChantiers, "cha-99"), null);
+verifier("tous les chantiers du dossier", tousLesChantiers(dossierChantiers).length, 3);
+verifier("le nom affiché tombe sur l'adresse à défaut de nom",
+  nomChantier({ nom: "", adresse: "3 rue Neuve", cp: "69001", ville: "Lyon" }), "3 rue Neuve, 69001 Lyon");
+verifier("un chantier sans adresse propre imprime celle du client",
+  adressePourDocument({ adresse: "", cp: "", ville: "" }, clientChantiers), "8 allée des Peupliers, 69100 Villeurbanne");
+verifier("un chantier avec adresse imprime la sienne",
+  adressePourDocument(clientChantiers.chantiers[0], clientChantiers), "40 rue Garibaldi\n69003 Lyon");
+
+verifier("les documents se filtrent par chantier",
+  documentsDuChantier(dossierChantiers, "cha-1").map((d) => d.id).sort(), ["d1", "f1"]);
+verifier("un chantier sans identifiant ne capte rien", documentsDuChantier(dossierChantiers, "").length, 0);
+verifier("les rendez-vous aussi", rdvDuChantier(dossierChantiers, "cha-1").length, 1);
+
+const bilanChantier = bilanCha(dossierChantiers, "cha-1");
+verifier("le bilan d'un chantier ne compte que SES documents", bilanChantier.facture, 1000);
+verifier("il compte ce qui est encaissé", bilanChantier.encaisse, 600);
+verifier("et ce qui reste dû", bilanChantier.du, 600);
+verifier("les devis ne comptent pas dans le facturé", bilanChantier.devisEnAttente, 1);
+
+verifier("les chantiers en cours passent devant",
+  trierChantiers(tousLesChantiers(dossierChantiers)).map((x) => x.chantier.statut),
+  ["en-cours", "prevu", "termine"]);
+verifier("la recherche porte sur la légende des photos",
+  correspondChantier(clientChantiers.chantiers[0], clientChantiers, "compteur"), true);
+verifier("la recherche porte sur la ville du chantier",
+  correspondChantier(clientChantiers.chantiers[0], clientChantiers, "lyon"), true);
+verifier("et ne trouve pas ce qui n'y est pas",
+  correspondChantier(clientChantiers.chantiers[0], clientChantiers, "toulouse"), false);
+
+verifier("les photos se regroupent par phase, dans l'ordre",
+  photosParPhase(clientChantiers.chantiers[0]).map((g) => `${g.cle}:${g.photos.length}`), ["avant:2", "apres:1"]);
+verifier("les « avant » sont triées par heure de prise",
+  photosParPhase(clientChantiers.chantiers[0])[0].photos.map((p) => p.id), ["p3", "p1"]);
+verifier("le poids des photos s'additionne", poidsPhotos(clientChantiers.chantiers[0]), 600000);
+verifier("l'avant/après prend la première et la dernière",
+  [avantApres(clientChantiers.chantiers[0]).avant.id, avantApres(clientChantiers.chantiers[0]).apres.id], ["p3", "p2"]);
+verifier("pas d'avant/après sans les deux", avantApres(clientChantiers.chantiers[1]), null);
+verifier("un chantier facturé ne se supprime pas",
+  raisonsChantier(dossierChantiers, "cha-1").length > 0, true);
+verifier("un chantier vierge se supprime", raisonsChantier(dossierChantiers, "cha-3"), []);
+verifier("toutes les photos du dossier sont recensées",
+  toutesLesPhotos(dossierChantiers).sort(), ["p1", "p2", "p3"]);
+
+section("Compatibilité des dossiers d'avant les chantiers");
+const ancien = normaliser({ clients: [{ id: "c1", nom: "Ancien" }], documents: [] });
+verifier("un client sans chantiers en reçoit un tableau", Array.isArray(ancien.clients[0].chantiers), true);
+const ancienAvecChantier = normaliser({ clients: [{ id: "c1", chantiers: [{ id: "cha-x", nom: "Vieux" }] }] });
+verifier("un chantier sans photos en reçoit un tableau",
+  Array.isArray(ancienAvecChantier.clients[0].chantiers[0].photos), true);
+verifier("et ses champs manquants reprennent leur défaut",
+  ancienAvecChantier.clients[0].chantiers[0].statut, "en-cours");
+
+section("Photos : import et export");
+const exportAvecPhotos = JSON.parse(JSON.stringify({ ...dossierChantiers, photos: { p1: "data:image/jpeg;base64,AAAA" } }));
+const relu = importerDossier(JSON.stringify(exportAvecPhotos));
+verifier("les photos sortent du dossier à l'import", relu.dossier.photos, undefined);
+verifier("et sont rendues à part", Object.keys(relu.photos), ["p1"]);
+const reluSansPhotos = importerDossier(JSON.stringify(dossierChantiers));
+verifier("un export sans photos rend null", reluSansPhotos.photos, null);
+verifier("le dossier reste lisible dans les deux cas", reluSansPhotos.dossier.clients.length, 1);
 
 /* ========================== La coquille hors ligne ======================= */
 section("Cache hors ligne — la liste de sw.js");

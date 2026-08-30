@@ -118,6 +118,7 @@ export function ouvrirIntervention(ctx, existante, options = {}) {
   const inter = interventionVide({
     rdvId: rdv?.id || "",
     clientId: rdv?.clientId || options.clientId || "",
+    chantierId: rdv?.chantierId || options.chantierId || "",
     equipementId: rdv?.equipementId || "",
     date: rdv ? rdv.debut.slice(0, 10) : aujourdhui(),
     arrivee: rdv ? heureDe(rdv.debut) : maintenantArrondi(),

@@ -61,6 +61,7 @@ import {
 } from "../domain/agenda.js";
 import { rdvVide, parId, equipementParId } from "../domain/dossier.js";
 import { correspond, adresseCourte, nomClient } from "../domain/clients.js";
+import { adresseCourte as adresseChantier, nomChantier } from "../domain/chantiers.js";
 import { creerDocument } from "./documents.js";
 import { ouvrirIntervention } from "./interventions.js";
 import { marquerPassage } from "../domain/contrats.js";
@@ -296,6 +297,8 @@ export function ouvrirRdv(ctx, rdvExistant, options = {}) {
         type: options.type || "depannage",
         contratId: options.contratId || "",
         equipementId: options.equipementId || "",
+        chantierId: options.chantierId || "",
+        adresse: options.adresse || "",
       });
 
   if (!brouillon.fin) {
@@ -479,6 +482,25 @@ function formulaireRdv(ctx, r, redessiner, types) {
       },
     }),
 
+    // Choisir le chantier remplit l'adresse : c'est le geste qui evite de
+    // retaper « 40 rue Garibaldi » pour la douzieme visite du meme immeuble.
+    client && (client.chantiers || []).length
+      ? champSelect("Chantier", {
+          valeur: r.chantierId,
+          options: [
+            { valeur: "", nom: "— aucun —" },
+            ...client.chantiers.map((c) => ({ valeur: c.id, nom: nomChantier(c) })),
+          ],
+          aide: "Le rendez-vous apparaîtra dans l'historique du chantier.",
+          onchange: (v) => {
+            r.chantierId = v;
+            const c = client.chantiers.find((x) => x.id === v);
+            if (c) r.adresse = adresseChantier(c) || r.adresse;
+            redessiner();
+          },
+        })
+      : null,
+
     champ("Adresse d'intervention", {
       valeur: r.adresse,
       placeholder: client ? adresseCourte(client) : "Rue, code postal, ville",
@@ -545,7 +567,12 @@ function formulaireRdv(ctx, r, redessiner, types) {
           bouton("Devis", {
             ico: "devis",
             petit: true,
-            onclick: () => creerDocument(ctx, "devis", { clientId: r.clientId, chantier: r.adresse }),
+            onclick: () =>
+              creerDocument(ctx, "devis", {
+                clientId: r.clientId,
+                chantierId: r.chantierId,
+                chantier: r.adresse,
+              }),
           }),
           r.contratId
             ? bouton("Entretien fait", {

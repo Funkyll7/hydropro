@@ -64,6 +64,7 @@ import {
 } from "../domain/documents.js";
 import { documentVide, ligneVide, parId } from "../domain/dossier.js";
 import { adresseCourte, correspond } from "../domain/clients.js";
+import { adressePourDocument, nomChantier } from "../domain/chantiers.js";
 import { chercher as chercherCatalogue, ligneDepuisArticle } from "../domain/catalogue.js";
 import { lienMail, remplirModele } from "../domain/mentions.js";
 import { id } from "../core/store.js";
@@ -438,11 +439,33 @@ function enTeteDocument(ctx, doc) {
         champ("Adresse du chantier", {
           valeur: doc.chantier,
           placeholder: "Si différente de l'adresse du client",
+          aide: "C'est ce texte-là qui s'imprime sur le document.",
           oninput: (v) => ctx.majSilencieux(() => {
             doc.chantier = v;
           }),
         })
       ),
+
+      // Le rattachement a un chantier est FACULTATIF : un depannage ponctuel
+      // n'en a pas besoin, et obliger a en creer un ferait abandonner la
+      // fonction au troisieme appel. Quand il est pose, il remplit l'adresse
+      // imprimee — et il fait apparaitre ce document dans la fiche du lieu.
+      client && (client.chantiers || []).length
+        ? champSelect("Rattacher à un chantier", {
+            valeur: doc.chantierId,
+            options: [
+              { valeur: "", nom: "— aucun —" },
+              ...client.chantiers.map((c) => ({ valeur: c.id, nom: nomChantier(c) })),
+            ],
+            aide: "Le document apparaîtra dans l'historique du chantier, avec ses photos.",
+            onchange: (v) =>
+              ctx.maj(() => {
+                doc.chantierId = v;
+                const c = client.chantiers.find((x) => x.id === v);
+                if (c) doc.chantier = adressePourDocument(c, client);
+              }),
+          })
+        : null,
       el(
         "div.grille.grille--2",
         champDate("Date", {
