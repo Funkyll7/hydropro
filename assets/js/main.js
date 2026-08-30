@@ -566,11 +566,21 @@ function brancherHorsLigne() {
     return;
   }
 
-  window.addEventListener("load", () => {
+  const inscrire = () => {
     navigator.serviceWorker.register(new URL("../../sw.js", import.meta.url)).catch((e) => {
       console.warn("Mode hors ligne indisponible", e);
     });
-  });
+  };
+
+  // `demarrer()` est asynchrone : il attend les donnees de reference avant
+  // d'arriver ici. Sur un vrai reseau, l'evenement `load` est donc DEJA PASSE,
+  // et un ecouteur pose maintenant ne se declencherait jamais — le service
+  // worker ne s'enregistrait pas, sans le moindre message, et l'application
+  // n'etait ni hors ligne ni installable. En local, ou les fichiers arrivent
+  // en une milliseconde, le bug ne se voyait pas : il n'est apparu qu'une fois
+  // le site publie. D'ou le test explicite sur `readyState`.
+  if (document.readyState === "complete") inscrire();
+  else window.addEventListener("load", inscrire, { once: true });
 }
 
 demarrer();
